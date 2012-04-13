@@ -1,31 +1,39 @@
 const St = imports.gi.St;
 const Main = imports.ui.main;
+const PanelMenu = imports.ui.panelMenu;
+const PopupMenu = imports.ui.popupMenu;
 
-let panel_button, icon;
+
+let menuItem;
+
+function CIStatusButton() {
+  this._init()
+}
+
+CIStatusButton.prototype = {
+
+  __proto__: PanelMenu.SystemStatusButton.prototype,
+
+  _init: function() {
+    PanelMenu.SystemStatusButton.prototype._init.call(this, 'cistatus-gray');
+
+    this._iconActor.icon_type = St.IconType.FULLCOLOR;
+
+    menuItem = new PopupMenu.PopupMenuItem(_("Settings"));
+    this.menu.addMenuItem(menuItem);
+  },
+
+  enable: function() {
+    Main.panel._rightBox.insert_actor(this.actor, 0);
+    Main.panel._menus.addMenu(this.menu);
+  },
+
+  disable: function() {
+    Main.panel._menus.removeMenu(this.menu);
+    Main.panel._rightBox.remove_actor(this.actor);
+  }
+}
 
 function init() {
-  panel_button = new St.Bin({
-    style_class: 'panel-button cistatus-panel',
-    reactive: true,
-    can_focus: true,
-    x_fill: true,
-    y_fill: true,
-    track_hover: true
-  });
-
-  icon = new St.Icon({
-    icon_name: 'cistatus-gray',
-    icon_type: St.IconType.FULLCOLOR,
-    icon_size: 16
-  });
-
-  panel_button.set_child(icon);
-}
-
-function enable() {
-  Main.panel._rightBox.insert_actor(panel_button, 0);
-}
-
-function disable() {
-  Main.panel._rightBox.remove_actor(panel_button);
+  return new CIStatusButton();
 }
