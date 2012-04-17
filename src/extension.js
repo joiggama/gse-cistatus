@@ -14,7 +14,7 @@ Soup.Session.prototype.add_feature.call(Session, new Soup.ProxyResolverDefault()
 
 
 const CI_URL = 'http://cruisecontrolrb.thoughtworks.com/XmlStatusReport.aspx';
-const LOOP_INTERVAL = 60;
+const LOOP_INTERVAL = 10;
 
 function CIStatusButton() {
   this._init()
@@ -27,19 +27,19 @@ CIStatusButton.prototype = {
   _init: function() {
     PanelMenu.SystemStatusButton.prototype._init.call(this, 'cistatus-gray');
     this._iconActor.icon_type = St.IconType.FULLCOLOR;
-
   },
 
   _getCruiseControlReport: function() {
-    if (typeof(self) != 'undefined') {
-      self.menu.removeAll();
+    if (this.menu.numMenuItems > 0) {
+      this.menu.removeAll();
     }
 
-    self = this;
-    message = Soup.Message.new('GET', CI_URL);
+    let self = this;
+    let message = Soup.Message.new('GET', CI_URL);
 
     Session.queue_message(message, function() {
-      if ((data = message.response_body.data) != null) {
+      let data = message.response_body.data;
+      if (data != null) {
         self._updateStatus(new XML(data));
       }
     });
@@ -49,7 +49,7 @@ CIStatusButton.prototype = {
   },
 
   _newStatusIcon: function(iconName) {
-    icon = new St.Icon({
+    let icon = new St.Icon({
       icon_name: iconName,
       icon_type: St.IconType.FULLCOLOR,
       icon_size: 16
@@ -58,15 +58,20 @@ CIStatusButton.prototype = {
   },
 
   _newMenuItem: function(itemName){
-    item = new PopupMenu.PopupMenuItem(_(itemName));
+    let item = new PopupMenu.PopupMenuItem(_(itemName));
     return item
   },
 
   _updateStatus: function(data) {
 
+    let anyFailure;
+
     for each(var project in data.Project) {
-      projectName   = project.@name.toString();
-      projectStatus = project.@lastBuildStatus.toString();
+      let projectName   = project.@name.toString();
+      let projectStatus = project.@lastBuildStatus.toString();
+      let projectUrl    = project.@webUrl.toString();
+
+      let iconName;
 
       switch(projectStatus) {
         case 'Success':
@@ -80,13 +85,13 @@ CIStatusButton.prototype = {
           iconName = 'cistatus-gray';
       }
 
-      menuItem = this._newMenuItem(projectName);
+      let menuItem = this._newMenuItem(projectName);
       menuItem.addActor(this._newStatusIcon(iconName));
 
       this.menu.addMenuItem(menuItem);
     }
 
-    globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
+    let globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
     this._iconActor.icon_name = globalStatus;
   },
 
