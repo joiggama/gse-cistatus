@@ -10,11 +10,13 @@ const Lang      = imports.lang;
 const Session   = new Soup.SessionAsync();
 
 // Allow Session work under a proxy http://goo.gl/KKCYe
-Soup.Session.prototype.add_feature.call(Session, new Soup.ProxyResolverDefault());
+Soup.Session.prototype.add_feature.call(
+  Session, new Soup.ProxyResolverDefault()
+);
 
 
 const CI_URL = 'http://cruisecontrolrb.thoughtworks.com/XmlStatusReport.aspx';
-const LOOP_INTERVAL = 10;
+const LOOP_INTERVAL = 60;
 
 function CIStatusButton() {
   this._init()
@@ -45,7 +47,10 @@ CIStatusButton.prototype = {
     });
 
 
-    Mainloop.timeout_add_seconds(LOOP_INTERVAL, Lang.bind(this, this._getCruiseControlReport));
+    Mainloop.timeout_add_seconds(
+      LOOP_INTERVAL,
+      Lang.bind(this, this._getCruiseControlReport)
+    );
   },
 
   _newStatusIcon: function(iconName) {
