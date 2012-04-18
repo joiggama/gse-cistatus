@@ -96,7 +96,8 @@ Indicator.prototype = {
     }
 
     let globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
-    this._iconActor.icon_name = globalStatus;
+    this.actor.destroy_children();
+    this.actor.add_actor(this._newStatusIcon(globalStatus));
   },
 
   enable: function() {
