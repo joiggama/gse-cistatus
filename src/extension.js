@@ -18,11 +18,11 @@ Soup.Session.prototype.add_feature.call(
 const CI_URL = 'http://cruisecontrolrb.thoughtworks.com/XmlStatusReport.aspx';
 const LOOP_INTERVAL = 60;
 
-function CIStatusButton() {
+function Indicator() {
   this._init()
 }
 
-CIStatusButton.prototype = {
+Indicator.prototype = {
 
   __proto__: PanelMenu.SystemStatusButton.prototype,
 
@@ -117,5 +117,5 @@ CIStatusButton.prototype = {
 }
 
 function init() {
-  return new CIStatusButton();
+  return new Indicator()
 }
