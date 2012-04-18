@@ -1,10 +1,10 @@
-const St        = imports.gi.St;
+const Lang      = imports.lang;
 const Main      = imports.ui.main;
+const Mainloop  = imports.mainloop;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Soup      = imports.gi.Soup;
-const Mainloop  = imports.mainloop;
-const Lang      = imports.lang;
+const St        = imports.gi.St;
 
 // Prevent Session from being garbage collected http://goo.gl/KKCYe
 const Session   = new Soup.SessionAsync();
