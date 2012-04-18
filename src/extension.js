@@ -18,15 +18,15 @@ Soup.Session.prototype.add_feature.call(
 const CI_URL = 'http://cruisecontrolrb.thoughtworks.com/XmlStatusReport.aspx';
 const LOOP_INTERVAL = 60;
 
-function Indicator() {
-  this._init()
+function Indicator(metadata) {
+  this._init(metadata)
 }
 
 Indicator.prototype = {
 
   __proto__: PanelMenu.SystemStatusButton.prototype,
 
-  _init: function() {
+  _init: function(metadata) {
     PanelMenu.SystemStatusButton.prototype._init.call(this, 'cistatus-gray');
     this._iconActor.icon_type = St.IconType.FULLCOLOR;
   },
@@ -114,6 +114,6 @@ Indicator.prototype = {
   }
 }
 
-function init() {
-  return new Indicator()
+function init(metadata) {
+  return new Indicator(metadata)
 }
