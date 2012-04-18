@@ -54,17 +54,15 @@ Indicator.prototype = {
   },
 
   _newStatusIcon: function(iconName) {
-    let icon = new St.Icon({
+    return new St.Icon({
       icon_name: iconName,
       icon_type: St.IconType.FULLCOLOR,
       icon_size: 16
-    });
-    return icon
+    })
   },
 
   _newMenuItem: function(itemName){
-    let item = new PopupMenu.PopupMenuItem(_(itemName));
-    return item
+    return new PopupMenu.PopupMenuItem(_(itemName))
   },
 
   _updateStatus: function(data) {
