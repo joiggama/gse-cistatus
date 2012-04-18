@@ -30,10 +30,8 @@ Indicator.prototype = {
   _init: function(metadata) {
     PanelMenu.Button.prototype._init.call(this, 0.0);
 
-    let main_icon_uri = 'file://' + metadata.path + '/icons/cistatus-gray.png';
-    let main_icon = Texture.load_uri_async(main_icon_uri, 16, 16);
-
-    this.actor.add_actor(main_icon);
+    this._path = metadata.path;
+    this.actor.add_actor(this._newStatusIcon('cistatus-gray'));
 
   },
 
@@ -60,11 +58,8 @@ Indicator.prototype = {
   },
 
   _newStatusIcon: function(iconName) {
-    return new St.Icon({
-      icon_name: iconName,
-      icon_type: St.IconType.FULLCOLOR,
-      icon_size: 16
-    })
+    let icon_uri = 'file://' + this._path + '/icons/' + iconName +'.png';
+    return Texture.load_uri_async(icon_uri, 16, 16)
   },
 
   _newMenuItem: function(itemName){
