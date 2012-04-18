@@ -14,6 +14,7 @@ Soup.Session.prototype.add_feature.call(
   Session, new Soup.ProxyResolverDefault()
 );
 
+const Texture   = St.TextureCache.get_default();
 
 const CI_URL = 'http://cruisecontrolrb.thoughtworks.com/XmlStatusReport.aspx';
 const LOOP_INTERVAL = 60;
@@ -24,11 +25,16 @@ function Indicator(metadata) {
 
 Indicator.prototype = {
 
-  __proto__: PanelMenu.SystemStatusButton.prototype,
+  __proto__: PanelMenu.Button.prototype,
 
   _init: function(metadata) {
-    PanelMenu.SystemStatusButton.prototype._init.call(this, 'cistatus-gray');
-    this._iconActor.icon_type = St.IconType.FULLCOLOR;
+    PanelMenu.Button.prototype._init.call(this, 0.0);
+
+    let main_icon_uri = 'file://' + metadata.path + '/icons/cistatus-gray.png';
+    let main_icon = Texture.load_uri_async(main_icon_uri, 16, 16);
+
+    this.actor.add_actor(main_icon);
+
   },
 
   _getCruiseControlReport: function() {
