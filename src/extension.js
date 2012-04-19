@@ -1,3 +1,4 @@
+const GLib      = imports.gi.GLib;
 const Lang      = imports.lang;
 const Main      = imports.ui.main;
 const Mainloop  = imports.mainloop;
@@ -90,14 +91,31 @@ Indicator.prototype = {
       }
 
       let menuItem = this._newMenuItem(projectName);
+
       menuItem.addActor(this._newStatusIcon(iconName));
 
+      menuItem.actor.connect('button-press-event', Lang.bind(this, function(){
+        this._visitProjectUrl(projectUrl);
+      }));
+
       this.menu.addMenuItem(menuItem);
+
+
     }
 
     let globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
     this.actor.destroy_children();
     this.actor.add_actor(this._newStatusIcon(globalStatus));
+  },
+
+  _visitProjectUrl: function(projectUrl) {
+    GLib.spawn_async_with_pipes(
+      null,
+      ["gnome-www-browser","-m", projectUrl],
+      null,
+      GLib.SpawnFlags.SEARCH_PATH,
+      null
+    );
   },
 
   enable: function() {
