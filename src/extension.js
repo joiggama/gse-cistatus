@@ -4,6 +4,7 @@ const Main      = imports.ui.main;
 const Mainloop  = imports.mainloop;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const Signals   = imports.signals;
 const Soup      = imports.gi.Soup;
 const St        = imports.gi.St;
 
@@ -26,19 +27,53 @@ function Indicator(metadata) {
 
 Indicator.prototype = {
 
-  __proto__: PanelMenu.Button.prototype,
+  __proto__: PanelMenu.ButtonBox.prototype,
 
   _init: function(metadata) {
-    PanelMenu.Button.prototype._init.call(this, 0.0);
+
+    PanelMenu.ButtonBox.prototype._init.call(this, {
+      reactive: true,
+      can_focus: true,
+      track_hover: true
+    });
 
     this._path = metadata.path;
     this.actor.add_actor(this._newStatusIcon('cistatus-gray'));
 
+    this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+
+    this.leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
+    Main.uiGroup.add_actor(this.leftMenu.actor);
+    this.leftMenu.actor.hide();
+
+    this.rightMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
+    Main.uiGroup.add_actor(this.rightMenu.actor);
+    this.rightMenu.actor.hide();
+
   },
 
+  _onButtonPress: function(actor, event) {
+      switch(event.get_button()){
+        case 1 :
+          // left button
+          this.rightMenu.isOpen ? this.rightMenu.close() : undefined;
+          this.leftMenu.toggle();
+          break;
+        case 3 :
+          // right button
+          this.leftMenu.isOpen ? this.leftMenu.close(): undefined;
+          this.rightMenu.toggle();
+          break;
+        default:
+          // any other button
+          break;
+      }
+  },
+
+
   _getCruiseControlReport: function() {
-    if (this.menu.numMenuItems > 0) {
-      this.menu.removeAll();
+    if (this.leftMenu.numMenuItems > 0) {
+      this.leftMenu.removeAll();
     }
 
     let self = this;
@@ -98,9 +133,7 @@ Indicator.prototype = {
         this._visitProjectUrl(projectUrl);
       }));
 
-      this.menu.addMenuItem(menuItem);
-
-
+      this.leftMenu.addMenuItem(menuItem);
     }
 
     let globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
@@ -120,7 +153,8 @@ Indicator.prototype = {
 
   enable: function() {
     Main.panel._rightBox.insert_actor(this.actor, 0);
-    Main.panel._menus.addMenu(this.menu);
+    Main.panel._menus.addMenu(this.rightMenu);
+    Main.panel._menus.addMenu(this.leftMenu);
 
     this._mainloop = Mainloop.timeout_add(0, Lang.bind(this, function() {
       this._getCruiseControlReport();
@@ -129,10 +163,12 @@ Indicator.prototype = {
 
   disable: function() {
     Mainloop.source_remove(this._mainloop);
-    Main.panel._menus.removeMenu(this.menu);
+    Main.panel._menus.removeMenu(this.leftMenu);
     Main.panel._rightBox.remove_actor(this.actor);
   }
 }
+
+Signals.addSignalMethods(Indicator.prototype);
 
 function init(metadata) {
   return new Indicator(metadata)
