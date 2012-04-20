@@ -18,7 +18,7 @@ Soup.Session.prototype.add_feature.call(
 
 const Texture   = St.TextureCache.get_default();
 
-const CI_URL = 'http://cruisecontrolrb.thoughtworks.com/XmlStatusReport.aspx';
+const CI_URL = 'http://ci.jenkins-ci.org/cc.xml';
 const LOOP_INTERVAL = 60;
 
 function Indicator(metadata) {
