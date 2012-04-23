@@ -59,22 +59,26 @@ Indicator.prototype = {
 
   },
 
+  // Dual click logic
   _onButtonPress: function(actor, event) {
-      switch(event.get_button()){
-        case 1 :
-          this._rightMenu.isOpen ? this._rightMenu.close() : undefined;
-          this._leftMenu.toggle();
-          break;
-        case 3 :
-          this._leftMenu.isOpen ? this._leftMenu.close(): undefined;
-          this._rightMenu.toggle();
-          break;
-        default:
-          break;
-      }
+    switch(event.get_button()){
+      case 1 :
+        this._rightMenu.isOpen ? this._rightMenu.close() : undefined;
+        this._leftMenu.toggle();
+        break;
+      case 3 :
+        this._leftMenu.isOpen ? this._leftMenu.close(): undefined;
+        this._rightMenu.toggle();
+        break;
+      default:
+        break;
+    }
   },
 
-  _getCruiseControlReport: function() {
+  // Get CI's report and call updateStatus after request completes
+  _getStatusReport: function() {
+
+    // Clean project list
     if (this._leftMenu.numMenuItems > 0) {
       this._leftMenu.removeAll();
     }
@@ -89,26 +93,31 @@ Indicator.prototype = {
       }
     });
 
+    // Keep refreshing every LOOP INTERVAL value in seconds
     Mainloop.timeout_add_seconds(
       LOOP_INTERVAL,
-      Lang.bind(this, this._getCruiseControlReport)
+      Lang.bind(this, this._getStatusReport)
     );
   },
 
+  // Build new project status icon
   _newStatusIcon: function(iconName) {
     let icon_uri = 'file://' + this._path + '/icons/' + iconName +'.png';
     return Texture.load_uri_async(icon_uri, 16, 16)
   },
 
+  // Build new project menu item
   _newMenuItem: function(itemName){
     return new PopupMenu.PopupMenuItem(_(itemName))
   },
 
+  // Update project menu items and their statuses
   _updateStatus: function(data) {
 
     let anyFailure;
 
     for each(var project in data.Project) {
+
       let projectName   = project.@name.toString();
       let projectStatus = project.@lastBuildStatus.toString();
       let projectUrl    = project.@webUrl.toString();
@@ -127,10 +136,11 @@ Indicator.prototype = {
           iconName = 'cistatus-gray';
       }
 
+      // Add a menu item and an icon for every project
       let menuItem = this._newMenuItem(projectName);
-
       menuItem.addActor(this._newStatusIcon(iconName));
 
+      // Bind project url
       menuItem.actor.connect('button-press-event', Lang.bind(this, function(){
         this._visitProjectUrl(projectUrl);
       }));
@@ -138,19 +148,16 @@ Indicator.prototype = {
       this._leftMenu.addMenuItem(menuItem);
     }
 
+    // Update global status icon
     let globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
     this.actor.destroy_children();
     this.actor.add_actor(this._newStatusIcon(globalStatus));
   },
 
+  // Open project url in the default browser
   _visitProjectUrl: function(projectUrl) {
-    GLib.spawn_async_with_pipes(
-      null,
-      ["gnome-www-browser","-m", projectUrl],
-      null,
-      GLib.SpawnFlags.SEARCH_PATH,
-      null
-    );
+    GLib.spawn_async_with_pipes(null, ["gnome-www-browser","-m", projectUrl],
+      null, GLib.SpawnFlags.SEARCH_PATH, null);
   },
 
   enable: function() {
@@ -159,7 +166,7 @@ Indicator.prototype = {
     Main.panel._menus.addMenu(this._leftMenu);
 
     this._mainloop = Mainloop.timeout_add(0, Lang.bind(this, function() {
-      this._getCruiseControlReport();
+      this._getStatusReport();
     }));
   },
 
@@ -169,7 +176,7 @@ Indicator.prototype = {
     Main.panel._rightBox.remove_actor(this.actor);
   }
 }
-
+// Add signals for event bindings
 Signals.addSignalMethods(Indicator.prototype);
 
 function init(metadata) {
