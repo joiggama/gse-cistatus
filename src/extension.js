@@ -64,8 +64,6 @@ Indicator.prototype = {
     item.actor.connect('button-press-event', Lang.bind(this, this._editSettings));
     this._rightMenu.addMenuItem(item);
 
-    self =  this;
-
   },
 
   // Open settings dialog
