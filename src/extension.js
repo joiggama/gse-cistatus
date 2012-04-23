@@ -11,15 +11,15 @@ const St        = imports.gi.St;
 // Prevent Session from being garbage collected http://goo.gl/KKCYe
 const Session   = new Soup.SessionAsync();
 
-// Allow Session work under a proxy http://goo.gl/KKCYe
-Soup.Session.prototype.add_feature.call(
-  Session, new Soup.ProxyResolverDefault()
-);
-
+// Texture cache to load icons
 const Texture   = St.TextureCache.get_default();
 
+// Settings
 const CI_URL = 'http://ci.jenkins-ci.org/cc.xml';
 const LOOP_INTERVAL = 60;
+
+// Allow Session work under a proxy http://goo.gl/KKCYe
+Soup.Session.prototype.add_feature.call(Session, new Soup.ProxyResolverDefault());
 
 function Indicator(metadata) {
   this._init(metadata)
@@ -37,43 +37,46 @@ Indicator.prototype = {
       track_hover: true
     });
 
+    // Store extension path
     this._path = metadata.path;
-    this.actor.add_actor(this._newStatusIcon('cistatus-gray'));
 
+    // Add global status icon and button press binding
+    this.actor.add_actor(this._newStatusIcon('cistatus-gray'));
     this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
 
-    this.leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
-    Main.uiGroup.add_actor(this.leftMenu.actor);
-    this.leftMenu.actor.hide();
+    // Build left menu for projects
+    this._leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
+    Main.uiGroup.add_actor(this._leftMenu.actor);
+    this._leftMenu.actor.hide();
 
-    this.rightMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
-    Main.uiGroup.add_actor(this.rightMenu.actor);
-    this.rightMenu.actor.hide();
+    // Build right menu for settings
+    this._rightMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
+    Main.uiGroup.add_actor(this._rightMenu.actor);
+    this._rightMenu.actor.hide();
+
+    let item = new PopupMenu.PopupMenuItem(_("Settings"));
+    this._rightMenu.addMenuItem(item);
 
   },
 
   _onButtonPress: function(actor, event) {
       switch(event.get_button()){
         case 1 :
-          // left button
-          this.rightMenu.isOpen ? this.rightMenu.close() : undefined;
-          this.leftMenu.toggle();
+          this._rightMenu.isOpen ? this._rightMenu.close() : undefined;
+          this._leftMenu.toggle();
           break;
         case 3 :
-          // right button
-          this.leftMenu.isOpen ? this.leftMenu.close(): undefined;
-          this.rightMenu.toggle();
+          this._leftMenu.isOpen ? this._leftMenu.close(): undefined;
+          this._rightMenu.toggle();
           break;
         default:
-          // any other button
           break;
       }
   },
 
-
   _getCruiseControlReport: function() {
-    if (this.leftMenu.numMenuItems > 0) {
-      this.leftMenu.removeAll();
+    if (this._leftMenu.numMenuItems > 0) {
+      this._leftMenu.removeAll();
     }
 
     let self = this;
@@ -85,7 +88,6 @@ Indicator.prototype = {
         self._updateStatus(new XML(data));
       }
     });
-
 
     Mainloop.timeout_add_seconds(
       LOOP_INTERVAL,
@@ -133,7 +135,7 @@ Indicator.prototype = {
         this._visitProjectUrl(projectUrl);
       }));
 
-      this.leftMenu.addMenuItem(menuItem);
+      this._leftMenu.addMenuItem(menuItem);
     }
 
     let globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
@@ -153,8 +155,8 @@ Indicator.prototype = {
 
   enable: function() {
     Main.panel._rightBox.insert_actor(this.actor, 0);
-    Main.panel._menus.addMenu(this.rightMenu);
-    Main.panel._menus.addMenu(this.leftMenu);
+    Main.panel._menus.addMenu(this._rightMenu);
+    Main.panel._menus.addMenu(this._leftMenu);
 
     this._mainloop = Mainloop.timeout_add(0, Lang.bind(this, function() {
       this._getCruiseControlReport();
@@ -163,7 +165,7 @@ Indicator.prototype = {
 
   disable: function() {
     Mainloop.source_remove(this._mainloop);
-    Main.panel._menus.removeMenu(this.leftMenu);
+    Main.panel._menus.removeMenu(this._leftMenu);
     Main.panel._rightBox.remove_actor(this.actor);
   }
 }
