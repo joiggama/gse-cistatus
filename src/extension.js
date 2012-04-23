@@ -58,24 +58,20 @@ Indicator.prototype = {
     Main.uiGroup.add_actor(this._rightMenu.actor);
     this._rightMenu.actor.hide();
 
+    this._settingsDialog = new Settings.Dialog();
+
     let item = new PopupMenu.PopupMenuItem(_("Settings"));
+    item.actor.connect('button-press-event', Lang.bind(this, this._editSettings));
     this._rightMenu.addMenuItem(item);
+
+    self =  this;
 
   },
 
-  // Dual click logic
-  _onButtonPress: function(actor, event) {
-    switch(event.get_button()){
-      case 1 :
-        this._rightMenu.isOpen ? this._rightMenu.close() : undefined;
-        this._leftMenu.toggle();
-        break;
-      case 3 :
-        this._leftMenu.isOpen ? this._leftMenu.close(): undefined;
-        this._rightMenu.toggle();
-        break;
-      default:
-        break;
+  // Open settings dialog
+  _editSettings: function(actor, event) {
+    if (event.get_button() == 1) {
+      this._settingsDialog.open(event.get_time());
     }
   },
 
@@ -113,6 +109,22 @@ Indicator.prototype = {
   // Build new project menu item
   _newMenuItem: function(itemName){
     return new PopupMenu.PopupMenuItem(_(itemName))
+  },
+
+  // Dual click logic
+  _onButtonPress: function(actor, event) {
+    switch(event.get_button()){
+      case 1 :
+        this._rightMenu.isOpen ? this._rightMenu.close() : undefined;
+        this._leftMenu.toggle();
+        break;
+      case 3 :
+        this._leftMenu.isOpen ? this._leftMenu.close(): undefined;
+        this._rightMenu.toggle();
+        break;
+      default:
+        break;
+    }
   },
 
   // Update project menu items and their statuses
@@ -181,6 +193,7 @@ Indicator.prototype = {
     Main.panel._rightBox.remove_actor(this.actor);
   }
 }
+
 // Add signals for event bindings
 Signals.addSignalMethods(Indicator.prototype);
 
