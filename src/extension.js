@@ -173,6 +173,7 @@ Indicator.prototype = {
   disable: function() {
     Mainloop.source_remove(this._mainloop);
     Main.panel._menus.removeMenu(this._leftMenu);
+    Main.panel._menus.removeMenu(this._rightMenu);
     Main.panel._rightBox.remove_actor(this.actor);
   }
 }
