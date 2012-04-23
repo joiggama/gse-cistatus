@@ -1,9 +1,13 @@
+const ExtSys    = imports.ui.extensionSystem;
+const Extension = ExtSys.extensions['joigama+cistatus@gmail.com'];
+
 const GLib      = imports.gi.GLib;
 const Lang      = imports.lang;
 const Main      = imports.ui.main;
 const Mainloop  = imports.mainloop;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const Settings  = Extension.settings;
 const Signals   = imports.signals;
 const Soup      = imports.gi.Soup;
 const St        = imports.gi.St;
