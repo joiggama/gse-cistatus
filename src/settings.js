@@ -14,39 +14,37 @@ Dialog.prototype = {
 
   _init: function() {
     ModalDialog.ModalDialog.prototype._init.call(this);
+    this._dialogLayout.add_style_class_name('settings-dialog');
 
-    let fields = new St.BoxLayout({ style_class: 'settings-dialog-fields'});
-    let labels = new St.BoxLayout({vertical: true});
-    let inputs = new St.BoxLayout({vertical: true});
+    let title = new St.Label({ style_class: 'settings-dialog-title' });
+    title.set_text(_("Settings - cistatus"));
+    this.contentLayout.add(title);
 
-    let label = new St.Label();
-    label.set_text(_("URL "));
 
-    labels.add(label, {
-      x_align: St.Align.START,
-      x_fill: true,
-      x_expand: true 
-    });
+    let fieldset = new St.BoxLayout({ style_class: 'settings-dialog-fields' });
 
-    this._url = new St.Entry({
+    let url = new St.BoxLayout({ vertical: false });
+
+    let urlLabel = new St.Label({ style_class: 'settings-dialog-label' });
+    urlLabel.set_text(_("URL"));
+
+    url.add(urlLabel, { x_align: St.Align.START });
+
+    let urlEntry = new St.Entry({
       style_class: 'settings-dialog-entry',
       can_focus: true 
     });
 
-    inputs.add(this._url, {
-      x_align: St.Align.END,
-      x_fill: false,
-      x_expand: true
+    url.add(urlEntry, {
+      x_align: St.Align.END
     });
 
-    fields.add(labels);
-    fields.add(inputs);
+    fieldset.add(url);
 
-    this._dialogLayout.style_class = 'settings-dialog modal-dialog';
-    this.contentLayout.add(fields, {
-      style_class: 'settings-dialog',
+    this.contentLayout.add(fieldset, {
       y_align: St.Align.START
     });
+
   },
 
   open: function(timestamp) {
