@@ -21,12 +21,11 @@ Dialog.prototype = {
     this.contentLayout.add(title);
 
     this.contentLayout.add(this._fields());
-
   },
 
   _fields: function(){
 
-    let urlLabel = new St.Label({ style_class: 'settings-dialog-label short' });
+    let urlLabel = new St.Label({ style_class: 'settings-dialog-label' });
     urlLabel.set_text(_("URL"));
 
     let urlEntry = new St.Entry({
@@ -39,12 +38,12 @@ Dialog.prototype = {
     url.add(urlEntry);
 
     let intervalLabel = new St.Label({
-      style_class: 'settings-dialog-label medium'
+      style_class: 'settings-dialog-label short'
     });
-    intervalLabel.set_text(_("Updates interval in seconds"));
+    intervalLabel.set_text(_("Refresh interval in seconds"));
 
     let intervalEntry = new St.Entry({
-      style_class: 'settings-dialog-entry xxx-hola'
+      style_class: 'settings-dialog-entry medium'
     });
 
     let interval = new St.BoxLayout({
