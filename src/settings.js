@@ -20,31 +20,49 @@ Dialog.prototype = {
     title.set_text(_("Settings - cistatus"));
     this.contentLayout.add(title);
 
+    this.contentLayout.add(this._fields());
 
-    let fieldset = new St.BoxLayout({ style_class: 'settings-dialog-fields' });
+  },
 
-    let url = new St.BoxLayout({ vertical: false });
+  _fields: function(){
 
-    let urlLabel = new St.Label({ style_class: 'settings-dialog-label' });
+    let urlLabel = new St.Label({ style_class: 'settings-dialog-label short' });
     urlLabel.set_text(_("URL"));
 
-    url.add(urlLabel, { x_align: St.Align.START });
-
     let urlEntry = new St.Entry({
-      style_class: 'settings-dialog-entry',
-      can_focus: true 
+      style_class: 'settings-dialog-entry large',
+      can_focus: true
     });
 
-    url.add(urlEntry, {
-      x_align: St.Align.END
+    let url = new St.BoxLayout({ vertical: false });
+    url.add(urlLabel);
+    url.add(urlEntry);
+
+    let intervalLabel = new St.Label({
+      style_class: 'settings-dialog-label medium'
+    });
+    intervalLabel.set_text(_("Updates interval in seconds"));
+
+    let intervalEntry = new St.Entry({
+      style_class: 'settings-dialog-entry xxx-hola'
     });
 
-    fieldset.add(url);
+    let interval = new St.BoxLayout({
+      vertical: false,
+      style_class: 'settings-dialog-fields'
+    });
+    interval.add(intervalLabel);
+    interval.add(intervalEntry);
 
-    this.contentLayout.add(fieldset, {
-      y_align: St.Align.START
+    let fields = new St.BoxLayout({
+      style_class: 'settings-dialog-fields',
+      vertical: true
     });
 
+    fields.add(url);
+    fields.add(interval);
+
+    return fields;
   },
 
   open: function(timestamp) {
