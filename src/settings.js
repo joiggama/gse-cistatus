@@ -16,33 +16,39 @@ Dialog.prototype = {
     ModalDialog.ModalDialog.prototype._init.call(this);
     this._dialogLayout.add_style_class_name('settings-dialog');
 
-    let title = new St.Label({ style_class: 'settings-dialog-title' });
-    title.set_text(_("Settings - cistatus"));
-    this.contentLayout.add(title);
-
-    this.contentLayout.add(this._fields());
+    this._setFields();
+    this.connect('opened', Lang.bind(this, this._onOpened));
   },
 
-  _fields: function(){
+  _onOpened: function(){
+    this._fields.url.grab_key_focus();
+  },
+
+  _setFields: function(){
+    this._fields = {};
+
+    this._title = new St.Label({ style_class: 'settings-dialog-title' });
+    this._title.set_text(_("Settings - cistatus"));
+    this.contentLayout.add(this._title);
 
     let urlLabel = new St.Label({ style_class: 'settings-dialog-label' });
     urlLabel.set_text(_("URL"));
 
-    let urlEntry = new St.Entry({
+    this._fields.url = new St.Entry({
       style_class: 'settings-dialog-entry large',
       can_focus: true
     });
 
     let url = new St.BoxLayout({ vertical: false });
     url.add(urlLabel);
-    url.add(urlEntry);
+    url.add(this._fields.url);
 
     let intervalLabel = new St.Label({
       style_class: 'settings-dialog-label short'
     });
     intervalLabel.set_text(_("Refresh interval in seconds"));
 
-    let intervalEntry = new St.Entry({
+    this._fields.interval = new St.Entry({
       style_class: 'settings-dialog-entry medium'
     });
 
@@ -51,39 +57,35 @@ Dialog.prototype = {
       style_class: 'settings-dialog-fields'
     });
     interval.add(intervalLabel);
-    interval.add(intervalEntry);
+    interval.add(this._fields.interval);
 
-    let fields = new St.BoxLayout({
+    let fieldset = new St.BoxLayout({
       style_class: 'settings-dialog-fields',
       vertical: true
     });
 
-    fields.add(url);
-    fields.add(interval);
+    fieldset.add(url);
+    fieldset.add(interval);
 
-    return fields;
-  },
+    this.contentLayout.add(fieldset);
 
-  open: function(timestamp) {
-    this.setButtons([
-      {
-        label: "Save",
-        action: Lang.bind(this, function() {
-          return true
-        })
-      },
-      {
-        label: "Cancel",
-        key: Clutter.KEY_Escape,
-        action: Lang.bind(this, function(){
-          this.close();
-        })
+    let saveButton = {
+      label: "Save",
+      action: function() {
+        return true
       }
-    ]);
+    };
 
-    ModalDialog.ModalDialog.prototype.open.call(this, timestamp);
+    let cancelButton = {
+      label: "Cancel",
+      key: Clutter.KEY_Escape,
+      action: Lang.bind(this, function() {
+        this.close()
+      })
+    };
+
+    this.setButtons([saveButton, cancelButton]);
   }
-
 };
 // Add signals for event bindings
 Signals.addSignalMethods(Dialog.prototype);
