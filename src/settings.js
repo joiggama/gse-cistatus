@@ -4,11 +4,11 @@ const ModalDialog = imports.ui.modalDialog;
 const Signals     = imports.signals;
 const St          = imports.gi.St;
 
-function Dialog() {
+function Editor() {
   this._init();
 }
 
-Dialog.prototype = {
+Editor.prototype = {
 
   __proto__: ModalDialog.ModalDialog.prototype,
 
@@ -88,4 +88,4 @@ Dialog.prototype = {
   }
 };
 // Add signals for event bindings
-Signals.addSignalMethods(Dialog.prototype);
+Signals.addSignalMethods(Editor.prototype);

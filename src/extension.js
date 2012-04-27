@@ -58,7 +58,7 @@ Indicator.prototype = {
     Main.uiGroup.add_actor(this._rightMenu.actor);
     this._rightMenu.actor.hide();
 
-    this._settingsDialog = new Settings.Dialog();
+    this._settings = new Settings.Editor();
 
     let item = new PopupMenu.PopupMenuItem(_("Settings"));
     item.actor.connect('button-press-event', Lang.bind(this, this._editSettings));
@@ -69,7 +69,7 @@ Indicator.prototype = {
   // Open settings dialog
   _editSettings: function(actor, event) {
     if (event.get_button() == 1) {
-      this._settingsDialog.open(event.get_time());
+      this._settings.open(event.get_time());
     }
   },
 
