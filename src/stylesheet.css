@@ -29,6 +29,7 @@
   color: rgb(136,136,136);
   transition-duration: 500;
   font-size: 11px;
+  height: 15px;
 }
 
 .settings-dialog-entry:focus, .settings-dialog-entry:hover {
