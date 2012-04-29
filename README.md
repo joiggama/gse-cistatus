@@ -1,6 +1,6 @@
 # CI Status extension for the gnome-shell
 
-## An status indicator for your continuous integration server builds.
+## A status indicator for your continuous integration server builds.
 
 This looks like the desired approach: 
 
