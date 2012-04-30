@@ -26,8 +26,13 @@ Editor.prototype = {
     this._setFields();
   },
 
-  // Set modal dialog default focus
+  // Set modal dialog default focus and fill with stored preferences if the exist
   _onOpen: function(){
+    if (this.preferences != undefined) {
+      this._fields.url.clutter_text.set_text(this.preferences.url);
+      this._fields.interval.clutter_text.set_text(
+        this.preferences.interval.toString());
+    }
     this._fields.url.grab_key_focus();
   },
 
