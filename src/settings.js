@@ -27,7 +27,7 @@ Editor.prototype = {
   },
 
   // Set modal dialog default focus and fill with stored preferences if the exist
-  _onOpen: function(){
+  _onOpen: function() {
     if (this.preferences != undefined) {
       this._fields.url.clutter_text.set_text(this.preferences.url);
       this._fields.interval.clutter_text.set_text(
@@ -36,9 +36,32 @@ Editor.prototype = {
     this._fields.url.grab_key_focus();
   },
 
+  // Callback for preferences-saved signal to fire settings write
+  _onSaved: function() {
+    this.write();
+    this.close();
+  },
+
+  // Save settings preferences logic
+  _save: function() {
+    params = {
+      url: this._fields.url.clutter_text.get_text(),
+      interval: this._fields.interval.clutter_text.get_text()
+    }
+    if (this._validate(params) == true) {
+      this.preferences.url = this._fields.url.clutter_text.get_text();
+      this.preferences.interval = parseInt(this._fields.interval.clutter_text.get_text());
+      this.emit('preferences-saved');
+    }
+    else {
+      global.log('preferences not saved');
+    }
+  },
+
   // Set event bindings
-  _setBindings: function(){
+  _setBindings: function() {
     this.connect('opened', Lang.bind(this, this._onOpen));
+    this.connect('preferences-saved', Lang.bind(this, this._onSaved));
   },
 
   // Build modal dialog controls
@@ -90,9 +113,9 @@ Editor.prototype = {
 
     let saveButton = {
       label: "Save",
-      action: function() {
-        return true
-      }
+      action: Lang.bind(this, function() {
+        this._save();
+      })
     };
 
     let cancelButton = {
@@ -106,8 +129,32 @@ Editor.prototype = {
     this.setButtons([saveButton, cancelButton]);
   },
 
+  // Validation of settings modal dialog fields
+  _validate: function(params) {
+    this._errors = { url: null, interval: null };
+
+    let urlRegexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
+
+    if (!urlRegexp.test(params.url)){
+       this._errors.url = "Invalid URL";
+    };
+
+
+    let intervalValue = parseInt(params.interval);
+    if ((intervalValue < 30) || (intervalValue > 1700)){
+      this._errors.interval = "Update interval must be between 30 and 1700 seconds";
+    }
+
+    if ((this._errors.url == null) && (this._errors.interval == null)){
+      return true
+    }
+    else{
+      return false
+    }
+  },
+
   // Read from settings file preferences.json
-  read: function(){
+  read: function() {
     let preferences;
 
     if (this._settingsFile.query_exists(null)) {
