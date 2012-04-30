@@ -15,14 +15,10 @@ const St        = imports.gi.St;
 // Prevent Session from being garbage collected http://goo.gl/KKCYe
 const Session   = new Soup.SessionAsync();
 
-// Texture cache to load icons
+// Create texture cache for icons load
 const Texture   = St.TextureCache.get_default();
 
-// Settings
-const CI_URL = 'http://ci.jenkins-ci.org/cc.xml';
-const LOOP_INTERVAL = 60;
-
-// Allow Session work under a proxy http://goo.gl/KKCYe
+// Allow Session to work under a proxy http://goo.gl/KKCYe
 Soup.Session.prototype.add_feature.call(Session, new Soup.ProxyResolverDefault());
 
 function Indicator(metadata) {
@@ -31,8 +27,10 @@ function Indicator(metadata) {
 
 Indicator.prototype = {
 
+  // Build over a Shell PanelMenu.ButtonBox
   __proto__: PanelMenu.ButtonBox.prototype,
 
+  // Intialize object
   _init: function(metadata) {
 
     PanelMenu.ButtonBox.prototype._init.call(this, {
@@ -58,8 +56,10 @@ Indicator.prototype = {
     Main.uiGroup.add_actor(this._rightMenu.actor);
     this._rightMenu.actor.hide();
 
-    this._settings = new Settings.Editor();
+    // Add settings editor
+    this._settings = new Settings.Editor(this._path);
 
+    // Add settings menu item to right menu
     let item = new PopupMenu.PopupMenuItem(_("Settings"));
     item.actor.connect('button-press-event', Lang.bind(this, this._editSettings));
     this._rightMenu.addMenuItem(item);
@@ -73,17 +73,20 @@ Indicator.prototype = {
     }
   },
 
-  // Get CI's report and call updateStatus after request completes
+  // Get CI's report
   _getStatusReport: function() {
+    // Create new request message
+    let message = Soup.Message.new('GET', this._settings.preferences.url);
 
     // Clean project list
     if (this._leftMenu.numMenuItems > 0) {
       this._leftMenu.removeAll();
     }
 
+    // Preserve object context
     let self = this;
-    let message = Soup.Message.new('GET', CI_URL);
 
+    // Fire request
     Session.queue_message(message, function() {
       let data = message.response_body.data;
       if (data != null) {
@@ -91,9 +94,9 @@ Indicator.prototype = {
       }
     });
 
-    // Keep refreshing every LOOP INTERVAL value in seconds
+    // Keep refreshing according to settings interval
     Mainloop.timeout_add_seconds(
-      LOOP_INTERVAL,
+      this._settings.preferences.interval,
       Lang.bind(this, this._getStatusReport)
     );
   },
@@ -159,6 +162,7 @@ Indicator.prototype = {
         this._visitProjectUrl(projectUrl);
       }));
 
+      // Add project to projects menu
       this._leftMenu.addMenuItem(menuItem);
     }
 
@@ -170,8 +174,8 @@ Indicator.prototype = {
 
   // Open project url in the default browser
   _visitProjectUrl: function(projectUrl) {
-    GLib.spawn_async_with_pipes(null, ["gnome-www-browser","-m", projectUrl],
-      null, GLib.SpawnFlags.SEARCH_PATH, null);
+    GLib.spawn_async_with_pipes(null, ["gnome-www-browser", "-m", projectUrl], null,
+                                GLib.SpawnFlags.SEARCH_PATH, null);
   },
 
   enable: function() {
@@ -179,9 +183,11 @@ Indicator.prototype = {
     Main.panel._menus.addMenu(this._rightMenu);
     Main.panel._menus.addMenu(this._leftMenu);
 
-    this._mainloop = Mainloop.timeout_add(0, Lang.bind(this, function() {
-      this._getStatusReport();
-    }));
+    if (this._settings.read()) {
+      this._mainloop = Mainloop.timeout_add(0, Lang.bind(this, function() {
+        this._getStatusReport();
+      }));
+    }
   },
 
   disable: function() {
