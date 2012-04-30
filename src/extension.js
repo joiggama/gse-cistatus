@@ -43,7 +43,7 @@ Indicator.prototype = {
     this._path = metadata.path;
 
     // Add global status icon and button press binding
-    this.actor.add_actor(this._newStatusIcon('cistatus-gray'));
+    this.actor.add_actor(this._newIcon('cistatus-settings'));
     this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
 
     // Build left menu for projects
@@ -61,6 +61,7 @@ Indicator.prototype = {
 
     // Add settings menu item to right menu
     let item = new PopupMenu.PopupMenuItem(_("Settings"));
+    item.addActor(this._newIcon('cistatus-settings'));
     item.actor.connect('button-press-event', Lang.bind(this, this._editSettings));
     this._rightMenu.addMenuItem(item);
 
@@ -102,7 +103,7 @@ Indicator.prototype = {
   },
 
   // Build new project status icon
-  _newStatusIcon: function(iconName) {
+  _newIcon: function(iconName) {
     let icon_uri = 'file://' + this._path + '/icons/' + iconName +'.png';
     return Texture.load_uri_async(icon_uri, 16, 16)
   },
@@ -155,7 +156,7 @@ Indicator.prototype = {
 
       // Add a menu item and an icon for every project
       let menuItem = this._newMenuItem(projectName);
-      menuItem.addActor(this._newStatusIcon(iconName));
+      menuItem.addActor(this._newIcon(iconName));
 
       // Bind project url
       menuItem.actor.connect('button-press-event', Lang.bind(this, function(){
@@ -169,7 +170,7 @@ Indicator.prototype = {
     // Update global status icon
     let globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
     this.actor.destroy_children();
-    this.actor.add_actor(this._newStatusIcon(globalStatus));
+    this.actor.add_actor(this._newIcon(globalStatus));
   },
 
   // Open project url in the default browser
