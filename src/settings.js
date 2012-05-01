@@ -160,7 +160,6 @@ Editor.prototype = {
     Main.messageTray.add(this._notificationSource);
   },
 
-
   // Validation of settings modal dialog fields
   _validate: function(params) {
     this._errors = { url: null, interval: null };
@@ -173,8 +172,8 @@ Editor.prototype = {
 
 
     let intervalValue = parseInt(params.interval);
-    if ((intervalValue < 30) || (intervalValue > 1700)){
-      this._errors.interval = "Update interval must be between 30 and 1700 seconds";
+    if ((intervalValue < 10) || (intervalValue > 1800) || isNaN(intervalValue)){
+      this._errors.interval = "Update interval must be between 10 seconds and half an hour";
     }
 
     if ((this._errors.url == null) && (this._errors.interval == null)){
