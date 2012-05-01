@@ -5,6 +5,11 @@ const ModalDialog = imports.ui.modalDialog;
 const Shell       = imports.gi.Shell;
 const Signals     = imports.signals;
 const St          = imports.gi.St;
+const MessageTray = imports.ui.messageTray;
+const Main        = imports.ui.main;
+
+// Create texture cache for icons load
+const Texture   = St.TextureCache.get_default();
 
 function Editor(path) {
   this._init(path);
@@ -18,12 +23,28 @@ Editor.prototype = {
   // Intialize object
   _init: function(path) {
     ModalDialog.ModalDialog.prototype._init.call(this);
+    this._path = path;
 
     // Grab settings file
     this._settingsFile = Gio.file_new_for_path(path).get_child('preferences.json');
 
     this._setBindings();
     this._setFields();
+    this._setNotificationSource();
+  },
+
+  // Load icon from local dir
+  _newIcon: function(iconName) {
+    let icon_uri = 'file://' + this._path + '/icons/' + iconName +'.png';
+    return Texture.load_uri_async(icon_uri, 16, 16)
+  },
+
+  // Show notification in the system tray
+  _notify: function(message, icon){
+    let notification = new MessageTray.Notification(this._notificationSource,
+                                                    "cistatus", message,
+                                                    { icon: this._newIcon(icon) } );
+    this._notificationSource.notify(notification);
   },
 
   // Set modal dialog default focus and fill with stored preferences if the exist
@@ -38,8 +59,10 @@ Editor.prototype = {
 
   // Callback for preferences-saved signal to fire settings write
   _onSaved: function() {
-    this.write();
-    this.close();
+    if (this.write()) {
+      this._notify('The preferences were saved correctly.', 'cistatus-settings')
+      this.close();
+    }
   },
 
   // Save settings preferences logic
@@ -48,6 +71,7 @@ Editor.prototype = {
       url: this._fields.url.clutter_text.get_text(),
       interval: this._fields.interval.clutter_text.get_text()
     }
+
     if (this._validate(params) == true) {
       this.preferences.url = this._fields.url.clutter_text.get_text();
       this.preferences.interval = parseInt(this._fields.interval.clutter_text.get_text());
@@ -56,6 +80,7 @@ Editor.prototype = {
     else {
       global.log('preferences not saved');
     }
+
   },
 
   // Set event bindings
@@ -128,6 +153,13 @@ Editor.prototype = {
 
     this.setButtons([saveButton, cancelButton]);
   },
+
+  // Create a notification source for all settings related notifications
+  _setNotificationSource: function() {
+    this._notificationSource = new MessageTray.SystemNotificationSource();
+    Main.messageTray.add(this._notificationSource);
+  },
+
 
   // Validation of settings modal dialog fields
   _validate: function(params) {

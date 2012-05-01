@@ -102,7 +102,7 @@ Indicator.prototype = {
     );
   },
 
-  // Build new project status icon
+  // Load icon from local dir
   _newIcon: function(iconName) {
     let icon_uri = 'file://' + this._path + '/icons/' + iconName +'.png';
     return Texture.load_uri_async(icon_uri, 16, 16)
