@@ -57,8 +57,22 @@ Editor.prototype = {
     this._fields.url.grab_key_focus();
   },
 
-  // Callback for preferences-saved signal to fire settings write
-  _onSaved: function() {
+  // Callback for preferences-validation-failed signal to display errors
+  _onValidationFailed: function() {
+    this._errorMessages.destroy_children();
+
+    for each(let error in this._errors){
+      this._errorMessages.add(new St.Label({ text: error}));
+    }
+  },
+
+  // Callback for preferences-validation-passed signal to fire settings write
+  _onValidationPassed: function() {
+    this._errorMessages.destroy_children();
+
+    this.preferences.url = this._fields.url.clutter_text.get_text();
+    this.preferences.interval = parseInt(this._fields.interval.clutter_text.get_text());
+
     if (this.write()) {
       this._notify('The preferences were saved correctly.', 'cistatus-settings')
       this.close();
@@ -67,26 +81,21 @@ Editor.prototype = {
 
   // Save settings preferences logic
   _save: function() {
-    params = {
-      url: this._fields.url.clutter_text.get_text(),
-      interval: this._fields.interval.clutter_text.get_text()
-    }
-
-    if (this._validate(params) == true) {
-      this.preferences.url = this._fields.url.clutter_text.get_text();
-      this.preferences.interval = parseInt(this._fields.interval.clutter_text.get_text());
-      this.emit('preferences-saved');
+    if (this._validate()) {
+      this.emit('preferences-validation-passed');
     }
     else {
-      global.log('preferences not saved');
+      this.emit('preferences-validation-failed');
     }
-
   },
 
   // Set event bindings
   _setBindings: function() {
     this.connect('opened', Lang.bind(this, this._onOpen));
-    this.connect('preferences-saved', Lang.bind(this, this._onSaved));
+    this.connect('preferences-validation-passed',
+                 Lang.bind(this, this._onValidationPassed));
+    this.connect('preferences-validation-failed',
+                 Lang.bind(this, this._onValidationFailed));
   },
 
   // Build modal dialog controls
@@ -97,6 +106,13 @@ Editor.prototype = {
     this._title = new St.Label({ style_class: 'settings-dialog-title' });
     this._title.set_text(_("Settings - cistatus"));
     this.contentLayout.add(this._title);
+
+    this._errorMessages = new St.BoxLayout({
+      style_class: 'settings-error-messages',
+      vertical: true
+    });
+
+    this.contentLayout.add(this._errorMessages);
 
     let urlLabel = new St.Label({ style_class: 'settings-dialog-label' });
     urlLabel.set_text(_("URL"));
@@ -161,27 +177,23 @@ Editor.prototype = {
   },
 
   // Validation of settings modal dialog fields
-  _validate: function(params) {
-    this._errors = { url: null, interval: null };
+  _validate: function() {
+    let url = this._fields.url.clutter_text.get_text();
+    let interval = parseInt(this._fields.interval.clutter_text.get_text());
+
+    this._errors = [];
 
     let urlRegexp = /(http|https):\/\/(\w+:{0,1}\w*@)?(\S+)(:[0-9]+)?(\/|\/([\w#!:.?+=&%@!\-\/]))?/;
 
-    if (!urlRegexp.test(params.url)){
-       this._errors.url = "Invalid URL";
+    if (!urlRegexp.test(url)){
+       this._errors.push("* Invalid URL");
     };
 
-
-    let intervalValue = parseInt(params.interval);
-    if ((intervalValue < 10) || (intervalValue > 1800) || isNaN(intervalValue)){
-      this._errors.interval = "Update interval must be between 10 seconds and half an hour";
+    if ((interval < 10) || (interval > 1800) || isNaN(interval)){
+      this._errors.push("* Refresh interval must be between 10 and 1700 seconds");
     }
 
-    if ((this._errors.url == null) && (this._errors.interval == null)){
-      return true
-    }
-    else{
-      return false
-    }
+    return this._errors.length > 0 ? false : true
   },
 
   // Read from settings file preferences.json

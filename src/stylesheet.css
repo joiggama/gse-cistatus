@@ -7,6 +7,7 @@
   font-weight: bold;
   text-align: center;
   color: rgb(135,135,135);
+  padding-bottom: 20px;
 }
 
 .settings-dialog-fields {
@@ -54,4 +55,9 @@
 
 .short {
   width: 155px;
+}
+
+.settings-error-messages {
+  font-size: 11px;
+  color: red;
 }
