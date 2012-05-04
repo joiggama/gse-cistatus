@@ -33,11 +33,7 @@ Indicator.prototype = {
   // Intialize object
   _init: function(metadata) {
 
-    PanelMenu.ButtonBox.prototype._init.call(this, {
-      reactive: true,
-      can_focus: true,
-      track_hover: true
-    });
+    PanelMenu.ButtonBox.prototype._init.call(this, { reactive: true });
 
     // Store extension path
     this._path = metadata.path;
