@@ -104,7 +104,7 @@ Editor.prototype = {
     this._dialogLayout.add_style_class_name('settings-dialog');
 
     this._title = new St.Label({ style_class: 'settings-dialog-title' });
-    this._title.set_text(_("Settings - cistatus"));
+    this._title.set_text(_("Settings - CI Status"));
     this.contentLayout.add(this._title);
 
     this._errorMessages = new St.BoxLayout({
