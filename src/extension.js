@@ -40,11 +40,9 @@ Indicator.prototype = {
     this.actor.connect('button-press-event', Lang.bind(this, this._onClick));
 
     this._leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
-    Main.uiGroup.add_actor(this._leftMenu.actor);
     this._leftMenu.actor.hide();
 
     this._rightMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
-    Main.uiGroup.add_actor(this._rightMenu.actor);
     this._rightMenu.actor.hide();
 
     let item = new PopupMenu.PopupMenuItem(_("Settings"));
@@ -149,7 +147,9 @@ Indicator.prototype = {
 
   enable: function() {
     Main.panel._rightBox.insert_actor(this.actor, 0);
+    Main.uiGroup.add_actor(this._rightMenu.actor);
     Main.panel._menus.addMenu(this._rightMenu);
+    Main.uiGroup.add_actor(this._leftMenu.actor);
     Main.panel._menus.addMenu(this._leftMenu);
 
     if (this._settings.read()) {
