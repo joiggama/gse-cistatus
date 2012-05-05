@@ -16,16 +16,12 @@ function Editor(path) {
 }
 
 Editor.prototype = {
-
-  // Build over a Shell ModalDialog
   __proto__: ModalDialog.ModalDialog.prototype,
 
-  // Intialize object
   _init: function(path) {
     ModalDialog.ModalDialog.prototype._init.call(this);
     this._path = path;
 
-    // Grab settings file
     this._settingsFile = Gio.file_new_for_path(path).get_child('preferences.json');
 
     this._setBindings();
@@ -36,7 +32,7 @@ Editor.prototype = {
   // Load icon from local dir
   _newIcon: function(iconName) {
     let icon_uri = 'file://' + this._path + '/icons/' + iconName +'.png';
-    return Texture.load_uri_async(icon_uri, 16, 16)
+    return Texture.load_uri_async(icon_uri, 16, 16);
   },
 
   // Show notification in the system tray
@@ -81,12 +77,7 @@ Editor.prototype = {
 
   // Save settings preferences logic
   _save: function() {
-    if (this._validate()) {
-      this.emit('preferences-validation-passed');
-    }
-    else {
-      this.emit('preferences-validation-failed');
-    }
+    this.emit('preferences-validation-' + (this._validate() ? 'passed' : 'failed'));
   },
 
   // Set event bindings
@@ -245,5 +236,4 @@ Editor.prototype = {
 
 };
 
-// Add signals for event bindings
 Signals.addSignalMethods(Editor.prototype);
