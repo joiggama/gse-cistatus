@@ -161,7 +161,9 @@ Indicator.prototype = {
 
   disable: function() {
     Mainloop.source_remove(this._mainloop);
+    Main.uiGroup.remove_actor(this._leftMenu.actor);
     Main.panel._menus.removeMenu(this._leftMenu);
+    Main.uiGroup.remove_actor(this._rightMenu.actor);
     Main.panel._menus.removeMenu(this._rightMenu);
     Main.panel._rightBox.remove_actor(this.actor);
   }
