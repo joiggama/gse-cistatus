@@ -37,8 +37,16 @@ Indicator.prototype = {
 
     // Store extension path
     this._path = metadata.path;
+    this._buildControls();
 
-    // Add global status icon and button press binding
+    // Add settings editor
+    this._settings = new Settings.Editor(this._path);
+
+
+  },
+
+  _buildControls: function() {
+     // Add indicator icon and button press binding
     this.actor.add_actor(this._newIcon('cistatus-settings'));
     this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
 
@@ -51,9 +59,6 @@ Indicator.prototype = {
     this._rightMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     Main.uiGroup.add_actor(this._rightMenu.actor);
     this._rightMenu.actor.hide();
-
-    // Add settings editor
-    this._settings = new Settings.Editor(this._path);
 
     // Add settings menu item to right menu
     let item = new PopupMenu.PopupMenuItem(_("Settings"));
