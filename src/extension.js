@@ -48,7 +48,7 @@ Indicator.prototype = {
   _buildControls: function() {
      // Add indicator icon and button press binding
     this.actor.add_actor(this._newIcon('cistatus-settings'));
-    this.actor.connect('button-press-event', Lang.bind(this, this._onButtonPress));
+    this.actor.connect('button-press-event', Lang.bind(this, this._onClick));
 
     // Build left menu for projects
     this._leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
@@ -115,7 +115,7 @@ Indicator.prototype = {
   },
 
   // Dual click logic
-  _onButtonPress: function(actor, event) {
+  _onClick: function(actor, event) {
     switch(event.get_button()){
       case 1 :
         this._rightMenu.isOpen ? this._rightMenu.close() : undefined;
