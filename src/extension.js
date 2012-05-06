@@ -44,19 +44,26 @@ Indicator.prototype = {
     this._rightMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     this._rightMenu.actor.hide();
 
-    let item = new PopupMenu.PopupMenuItem(_("Settings"));
-    item.addActor(this._newIcon('cistatus-settings'));
-    item.actor.connect('button-press-event', Lang.bind(this._settings, this._settings.open));
-    this._rightMenu.addMenuItem(item);
+    this._settingsMenuItem = new PopupMenu.PopupMenuItem(_("Settings"));
+    this._settingsMenuItem.addActor(this._newIcon('cistatus-settings'));
+    this._rightMenu.addMenuItem(this._settingsMenuItem);
   },
 
+  // Connect signal handlers
   _connectControls: function() {
-    this._iconOnClickId = this.actor.connect('button-press-event',
-                                             Lang.bind(this, this._onClick));
+    this._iconOnClickId = this.actor.connect(
+      'button-press-event', Lang.bind(this, this._onClick)
+    );
+
+    this._settingsMenuItemOnClickId =  this._settingsMenuItem.actor.connect(
+      'button-press-event', Lang.bind(this._settings, this._settings.open)
+    );
   },
 
+  // Disconnect signal handlers
   _disconnectControls: function() {
     this.actor.disconnect(this._iconOnClickId);
+    this._settingsMenuItem.actor.disconnect(this._settingsMenuItemOnClickId);
   },
 
   // Get CI's report
@@ -159,6 +166,7 @@ Indicator.prototype = {
     Main.panel._menus.addMenu(this._rightMenu);
     Main.uiGroup.add_actor(this._leftMenu.actor);
     Main.panel._menus.addMenu(this._leftMenu);
+
     this._connectControls();
 
     if (this._settings.read()) {
@@ -169,8 +177,10 @@ Indicator.prototype = {
   },
 
   disable: function() {
-    this._disconnectControls();
     Mainloop.source_remove(this._mainloop);
+
+    this._disconnectControls();
+
     Main.uiGroup.remove_actor(this._leftMenu.actor);
     Main.panel._menus.removeMenu(this._leftMenu);
     Main.uiGroup.remove_actor(this._rightMenu.actor);
