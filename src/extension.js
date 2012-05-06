@@ -2,6 +2,7 @@ const ExtSys    = imports.ui.extensionSystem;
 const Extension = ExtSys.extensions['joigama+cistatus@gmail.com'];
 
 const GLib      = imports.gi.GLib;
+const Icons     = Extension.iconLoader;
 const Lang      = imports.lang;
 const Main      = imports.ui.main;
 const Mainloop  = imports.mainloop;
@@ -31,12 +32,13 @@ Indicator.prototype = {
     PanelMenu.ButtonBox.prototype._init.call(this, { reactive: true });
     this._path = metadata.path;
     this._settings = new Settings.Editor(this._path);
+    this._icons = new Icons.Loader(this._path);
     this._buildControls();
   },
 
   // Build indicator controls
   _buildControls: function() {
-    this.actor.add_actor(this._newIcon('cistatus-settings'));
+    this.actor.add_actor(this._icons.get('cistatus-settings'));
 
     this._leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     this._leftMenu.actor.hide();
@@ -45,7 +47,7 @@ Indicator.prototype = {
     this._rightMenu.actor.hide();
 
     this._settingsMenuItem = new PopupMenu.PopupMenuItem(_("Settings"));
-    this._settingsMenuItem.addActor(this._newIcon('cistatus-settings'));
+    this._settingsMenuItem.addActor(this._icons.get('cistatus-settings'));
     this._rightMenu.addMenuItem(this._settingsMenuItem);
   },
 
@@ -83,12 +85,6 @@ Indicator.prototype = {
       this._settings.preferences.interval,
       Lang.bind(this, this._getStatusReport)
     );
-  },
-
-  // Load icon from local dir
-  _newIcon: function(iconName) {
-    let icon_uri = 'file://' + this._path + '/icons/' + iconName +'.png';
-    return Texture.load_uri_async(icon_uri, 16, 16);
   },
 
   // Build new project menu item
@@ -141,7 +137,7 @@ Indicator.prototype = {
       }
 
       let menuItem = this._newMenuItem(projectName);
-      menuItem.addActor(this._newIcon(iconName));
+      menuItem.addActor(this._icons.get(iconName));
 
       menuItem.actor.connect('button-press-event', Lang.bind(this, function(){
         this._visitProjectUrl(projectUrl);
@@ -152,7 +148,7 @@ Indicator.prototype = {
 
     let globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
     this.actor.destroy_children();
-    this.actor.add_actor(this._newIcon(globalStatus));
+    this.actor.add_actor(this._icons.get(globalStatus));
   },
 
   // Open project url in the default browser
