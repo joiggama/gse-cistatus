@@ -70,10 +70,6 @@ Indicator.prototype = {
   _getStatusReport: function() {
     let message = Soup.Message.new('GET', this._settings.preferences.url);
 
-    if (this._leftMenu.numMenuItems > 0) {
-      this._leftMenu.removeAll();
-    }
-
     let self = this;
 
     Session.queue_message(message, function() {
@@ -119,6 +115,11 @@ Indicator.prototype = {
   // Update project menu items and their statuses
   _updateStatus: function(data) {
     let anyFailure;
+
+    if (this._leftMenu.numMenuItems > 0) {
+      this._leftMenu.removeAll();
+    }
+
     for each(let project in data.Project) {
 
       let projectName   = project.@name.toString();
