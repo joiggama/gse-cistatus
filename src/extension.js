@@ -51,7 +51,7 @@ Indicator.prototype = {
 
   // Connect signal handlers
   _connectControls: function() {
-    this._iconOnClickId = this.actor.connect(
+    this._indicatorOnClickId = this.actor.connect(
       'button-press-event', Lang.bind(this, this._onClick)
     );
 
@@ -62,7 +62,7 @@ Indicator.prototype = {
 
   // Disconnect signal handlers
   _disconnectControls: function() {
-    this.actor.disconnect(this._iconOnClickId);
+    this.actor.disconnect(this._indicatorOnClickId);
     this._settingsMenuItem.actor.disconnect(this._settingsMenuItemOnClickId);
   },
 
