@@ -1,5 +1,9 @@
+const ExtSys    = imports.ui.extensionSystem;
+const Extension = ExtSys.extensions['joigama+cistatus@gmail.com'];
+
 const Clutter     = imports.gi.Clutter;
 const Gio         = imports.gi.Gio;
+const Icons       = Extension.iconLoader;
 const Lang        = imports.lang;
 const ModalDialog = imports.ui.modalDialog;
 const Shell       = imports.gi.Shell;
@@ -20,7 +24,8 @@ Editor.prototype = {
 
   _init: function(path) {
     ModalDialog.ModalDialog.prototype._init.call(this);
-    this._path = path;
+
+    this._icons = new Icons.Loader(path)
 
     this._settingsFile = Gio.file_new_for_path(path).get_child('preferences.json');
 
@@ -29,17 +34,13 @@ Editor.prototype = {
     this._setNotificationSource();
   },
 
-  // Load icon from local dir
-  _newIcon: function(iconName) {
-    let icon_uri = 'file://' + this._path + '/icons/' + iconName +'.png';
-    return Texture.load_uri_async(icon_uri, 16, 16);
-  },
-
   // Show notification in the system tray
   _notify: function(message, icon){
-    let notification = new MessageTray.Notification(this._notificationSource,
-                                                    "cistatus", message,
-                                                    { icon: this._newIcon(icon) } );
+    let notification = new MessageTray.Notification(
+      this._notificationSource,
+      "cistatus", message,
+      { icon: this._icons.get(icon) }
+    );
     this._notificationSource.notify(notification);
   },
 

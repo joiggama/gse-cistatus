@@ -30,9 +30,8 @@ Indicator.prototype = {
 
   _init: function(metadata) {
     PanelMenu.ButtonBox.prototype._init.call(this, { reactive: true });
-    this._path = metadata.path;
-    this._settings = new Settings.Editor(this._path);
-    this._icons = new Icons.Loader(this._path);
+    this._settings = new Settings.Editor(metadata.path);
+    this._icons = new Icons.Loader(metadata.path);
     this._buildControls();
   },
 
