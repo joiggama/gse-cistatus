@@ -49,6 +49,8 @@ Indicator.prototype = {
     this._settingsMenuItem = new PopupMenu.PopupMenuItem(_("Settings"));
     this._settingsMenuItem.addActor(this._icons.get('cistatus-settings'));
     this._rightMenu.addMenuItem(this._settingsMenuItem);
+
+    this._projectsMenuItems = [];
   },
 
   // Connect signal handlers
@@ -108,13 +110,22 @@ Indicator.prototype = {
     }
   },
 
+  _removeProjectsMenuItems: function() {
+     if(this._projectsMenuItems.length > 0) {
+      for each(let projectMenuItem in this._projectsMenuItems) {
+        projectMenuItem.menu_item.actor.disconnect(projectMenuItem.event_id);
+        projectMenuItem.menu_item.actor.destroy_children();
+      };
+      this._projectsMenuItems = [];
+      this._leftMenu.removeAll();
+    };
+  },
+
   // Update project menu items and their statuses
   _updateStatus: function(data) {
     let anyFailure;
 
-    if (this._leftMenu.numMenuItems > 0) {
-      this._leftMenu.removeAll();
-    }
+    this._removeProjectsMenuItems();
 
     for each(let project in data.Project) {
 
@@ -139,9 +150,16 @@ Indicator.prototype = {
       let menuItem = this._newMenuItem(projectName);
       menuItem.addActor(this._icons.get(iconName));
 
-      menuItem.actor.connect('button-press-event', Lang.bind(this, function(){
-        this._visitProjectUrl(projectUrl);
-      }));
+      let menuItemOnClickId = menuItem.actor.connect(
+        'button-press-event', Lang.bind(this, function() {
+          this._visitProjectUrl(projectUrl);
+        })
+      );
+
+      this._projectsMenuItems.push({
+        menu_item: menuItem,
+        event_id: menuItemOnClickId
+      });
 
       this._leftMenu.addMenuItem(menuItem);
     }
@@ -177,6 +195,7 @@ Indicator.prototype = {
     Mainloop.source_remove(this._mainloop);
 
     this._disconnectControls();
+    this._removeProjectsMenuItems();
 
     Main.uiGroup.remove_actor(this._leftMenu.actor);
     Main.panel._menus.removeMenu(this._leftMenu);
