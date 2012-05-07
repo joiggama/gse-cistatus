@@ -6,6 +6,7 @@ const Icons     = Extension.iconLoader;
 const Lang      = imports.lang;
 const Main      = imports.ui.main;
 const Mainloop  = imports.mainloop;
+const MsgTray   = imports.ui.messageTray;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const Settings  = Extension.settings;
@@ -30,7 +31,11 @@ Indicator.prototype = {
 
   _init: function(metadata) {
     PanelMenu.ButtonBox.prototype._init.call(this, { reactive: true });
-    this._settings = new Settings.Editor(metadata.path);
+
+    this._notificationSource = new MsgTray.SystemNotificationSource();
+    Main.messageTray.add(this._notificationSource); // Should I put this here ?
+
+    this._settings = new Settings.Editor(metadata.path, this._notificationSource);
     this._icons = new Icons.Loader(metadata.path);
     this._buildControls();
   },

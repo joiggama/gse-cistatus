@@ -6,92 +6,35 @@ const Gio         = imports.gi.Gio;
 const Icons       = Extension.iconLoader;
 const Lang        = imports.lang;
 const ModalDialog = imports.ui.modalDialog;
+const MsgTray     = imports.ui.messageTray;
 const Shell       = imports.gi.Shell;
 const Signals     = imports.signals;
 const St          = imports.gi.St;
-const MessageTray = imports.ui.messageTray;
 const Main        = imports.ui.main;
 
 // Create texture cache for icons load
 const Texture   = St.TextureCache.get_default();
 
-function Editor(path) {
-  this._init(path);
+function Editor(path, source) {
+  this._init(path, source);
 }
 
 Editor.prototype = {
   __proto__: ModalDialog.ModalDialog.prototype,
 
-  _init: function(path) {
+  _init: function(path, source) {
     ModalDialog.ModalDialog.prototype._init.call(this);
 
+    this._notificationSource = source;
     this._icons = new Icons.Loader(path)
-
     this._settingsFile = Gio.file_new_for_path(path).get_child('preferences.json');
 
-    this._setBindings();
-    this._setFields();
-    this._setNotificationSource();
-  },
-
-  // Show notification in the system tray
-  _notify: function(message, icon){
-    let notification = new MessageTray.Notification(
-      this._notificationSource,
-      "cistatus", message,
-      { icon: this._icons.get(icon) }
-    );
-    this._notificationSource.notify(notification);
-  },
-
-  // Set modal dialog default focus and fill with stored preferences if the exist
-  _onOpen: function() {
-    if (this.preferences != undefined) {
-      this._fields.url.clutter_text.set_text(this.preferences.url);
-      this._fields.interval.clutter_text.set_text(
-        this.preferences.interval.toString());
-    }
-    this._fields.url.grab_key_focus();
-  },
-
-  // Callback for preferences-validation-failed signal to display errors
-  _onValidationFailed: function() {
-    this._errorMessages.destroy_children();
-
-    for each(let error in this._errors){
-      this._errorMessages.add(new St.Label({ text: error}));
-    }
-  },
-
-  // Callback for preferences-validation-passed signal to fire settings write
-  _onValidationPassed: function() {
-    this._errorMessages.destroy_children();
-
-    this.preferences.url = this._fields.url.clutter_text.get_text();
-    this.preferences.interval = parseInt(this._fields.interval.clutter_text.get_text());
-
-    if (this.write()) {
-      this._notify('The preferences were saved correctly.', 'cistatus-settings')
-      this.close();
-    }
-  },
-
-  // Save settings preferences logic
-  _save: function() {
-    this.emit('preferences-validation-' + (this._validate() ? 'passed' : 'failed'));
-  },
-
-  // Set event bindings
-  _setBindings: function() {
-    this.connect('opened', Lang.bind(this, this._onOpen));
-    this.connect('preferences-validation-passed',
-                 Lang.bind(this, this._onValidationPassed));
-    this.connect('preferences-validation-failed',
-                 Lang.bind(this, this._onValidationFailed));
+    this._buildControls();
+    this._connectControls();
   },
 
   // Build modal dialog controls
-  _setFields: function(){
+  _buildControls: function(){
     this._fields = {};
     this._dialogLayout.add_style_class_name('settings-dialog');
 
@@ -162,10 +105,60 @@ Editor.prototype = {
     this.setButtons([saveButton, cancelButton]);
   },
 
-  // Create a notification source for all settings related notifications
-  _setNotificationSource: function() {
-    this._notificationSource = new MessageTray.SystemNotificationSource();
-    Main.messageTray.add(this._notificationSource);
+  // Set event bindings
+  _connectControls: function() {
+    this.connect('opened', Lang.bind(this, this._onOpen));
+    this.connect('preferences-validation-passed',
+                 Lang.bind(this, this._onValidationPassed));
+    this.connect('preferences-validation-failed',
+                 Lang.bind(this, this._onValidationFailed));
+  },
+
+  // Show notification in the system tray
+  _notify: function(message, icon){
+    let notification = new MsgTray.Notification(
+      this._notificationSource,
+      "cistatus", message,
+      { icon: this._icons.get(icon) }
+    );
+    this._notificationSource.notify(notification);
+  },
+
+  // Set modal dialog default focus and fill with stored preferences if the exist
+  _onOpen: function() {
+    if (this.preferences != undefined) {
+      this._fields.url.clutter_text.set_text(this.preferences.url);
+      this._fields.interval.clutter_text.set_text(
+        this.preferences.interval.toString());
+    }
+    this._fields.url.grab_key_focus();
+  },
+
+  // Callback for preferences-validation-failed signal to display errors
+  _onValidationFailed: function() {
+    this._errorMessages.destroy_children();
+
+    for each(let error in this._errors){
+      this._errorMessages.add(new St.Label({ text: error}));
+    }
+  },
+
+  // Callback for preferences-validation-passed signal to fire settings write
+  _onValidationPassed: function() {
+    this._errorMessages.destroy_children();
+
+    this.preferences.url = this._fields.url.clutter_text.get_text();
+    this.preferences.interval = parseInt(this._fields.interval.clutter_text.get_text());
+
+    if (this.write()) {
+      this._notify('The preferences were saved correctly.', 'cistatus-settings')
+      this.close();
+    }
+  },
+
+  // Save settings preferences logic
+  _save: function() {
+    this.emit('preferences-validation-' + (this._validate() ? 'passed' : 'failed'));
   },
 
   // Validation of settings modal dialog fields
