@@ -30,7 +30,6 @@ Editor.prototype = {
     this._settingsFile = Gio.file_new_for_path(path).get_child('preferences.json');
 
     this._buildControls();
-    this._connectControls();
   },
 
   // Build modal dialog controls
@@ -105,13 +104,22 @@ Editor.prototype = {
     this.setButtons([saveButton, cancelButton]);
   },
 
-  // Set event bindings
+  // Connect signal handlers
   _connectControls: function() {
-    this.connect('opened', Lang.bind(this, this._onOpen));
-    this.connect('preferences-validation-passed',
-                 Lang.bind(this, this._onValidationPassed));
-    this.connect('preferences-validation-failed',
-                 Lang.bind(this, this._onValidationFailed));
+    this._onOpenedId =this.connect('opened', Lang.bind(this, this._onOpen));
+
+    this._onValidationPassedId = this.connect(
+      'preferences-validation-passed', Lang.bind(this, this._onValidationPassed));
+
+    this._onValidationFailedId = this.connect(
+      'preferences-validation-failed', Lang.bind(this, this._onValidationFailed));
+  },
+
+  // Disconnect signal handlers
+  _disconnectControls: function() {
+    this.disconnect(this._onOpenedId);
+    this.disconnect(this._onValidationPassedId);
+    this.disconnect(this._onValidationFailedId);
   },
 
   // Show notification in the system tray
@@ -179,6 +187,14 @@ Editor.prototype = {
     }
 
     return this._errors.length > 0 ? false : true
+  },
+
+  disable: function() {
+    this._disconnectControls();
+  },
+
+  enable: function() {
+    this._connectControls();
   },
 
   // Read from settings file preferences.json
