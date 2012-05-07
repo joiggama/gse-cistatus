@@ -110,6 +110,7 @@ Indicator.prototype = {
     }
   },
 
+  // Disconnect event signals and remove projects menu items
   _removeProjectsMenuItems: function() {
      if(this._projectsMenuItems.length > 0) {
       for each(let projectMenuItem in this._projectsMenuItems) {
