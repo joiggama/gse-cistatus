@@ -67,12 +67,17 @@ Indicator.prototype = {
     this._settingsMenuItemOnClickId =  this._settingsMenuItem.actor.connect(
       'button-press-event', Lang.bind(this._settings, this._settings.open)
     );
+
+    this._onGlobalStatusChangedId = this.connect(
+      'global-status-changed', Lang.bind(this, this._onGlobalStatusChanged)
+    );
   },
 
   // Disconnect signal handlers
   _disconnectControls: function() {
     this.actor.disconnect(this._indicatorOnClickId);
     this._settingsMenuItem.actor.disconnect(this._settingsMenuItemOnClickId);
+    this.disconnect(this._onGlobalStatusChangedId);
   },
 
   // Get CI's report
@@ -85,6 +90,10 @@ Indicator.prototype = {
       let data = message.response_body.data;
       if (data != null) {
         self._updateStatus(new XML(data));
+      }
+      else {
+        self._globalStatus = 'cistatus-unknown';
+        self.emit('global-status-changed');
       }
     });
 
@@ -113,6 +122,12 @@ Indicator.prototype = {
       default:
         break;
     }
+  },
+
+  // On global status changed callback
+  _onGlobalStatusChanged: function() {
+    this.actor.destroy_children();
+    this.actor.add_actor(this._icons.get(this._globalStatus));
   },
 
   // Disconnect event signals and remove projects menu items
