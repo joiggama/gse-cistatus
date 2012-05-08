@@ -150,7 +150,7 @@ Indicator.prototype = {
           anyFailure = true;
           break;
         default:
-          iconName = 'cistatus-gray';
+          iconName = 'cistatus-unknown';
       }
 
       let menuItem = this._newMenuItem(projectName);
