@@ -125,11 +125,11 @@ Editor.prototype = {
   // Show notification in the system tray
   _notify: function(message, icon){
     let notification = new MsgTray.Notification(
-      this._notificationSource,
+      this._source,
       "cistatus", message,
       { icon: this._icons.get(icon) }
     );
-    this._notificationSource.notify(notification);
+    this._source.notify(notification);
   },
 
   // Set modal dialog default focus and fill with stored preferences if the exist
