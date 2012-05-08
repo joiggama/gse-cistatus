@@ -32,12 +32,13 @@ Indicator.prototype = {
   _init: function(metadata) {
     PanelMenu.ButtonBox.prototype._init.call(this, { reactive: true });
 
-    this._notificationSource = new MsgTray.SystemNotificationSource();
-    Main.messageTray.add(this._notificationSource); // Should I put this here ?
-
-    this._settings = new Settings.Editor(metadata.path, this._notificationSource);
     this._icons = new Icons.Loader(metadata.path);
+    this._source = new MsgTray.SystemNotificationSource();
+    this._settings = new Settings.Editor(metadata.path, this._icons, this._source);
+
     this._buildControls();
+
+    Main.messageTray.add(this._source); // Should I move this somewhere else ?
   },
 
   // Build indicator controls
@@ -47,14 +48,14 @@ Indicator.prototype = {
     this._leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     this._leftMenu.actor.hide();
 
+    this._projectsMenuItems = [];
+
     this._rightMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     this._rightMenu.actor.hide();
 
-    this._settingsMenuItem = new PopupMenu.PopupMenuItem(_("Settings"));
+    this._settingsMenuItem = this._newMenuItem("Settings");
     this._settingsMenuItem.addActor(this._icons.get('cistatus-settings'));
     this._rightMenu.addMenuItem(this._settingsMenuItem);
-
-    this._projectsMenuItems = [];
   },
 
   // Connect signal handlers

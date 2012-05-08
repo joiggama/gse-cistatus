@@ -15,18 +15,18 @@ const Main        = imports.ui.main;
 // Create texture cache for icons load
 const Texture   = St.TextureCache.get_default();
 
-function Editor(path, source) {
-  this._init(path, source);
+function Editor(path, iconLoader, notificationSource) {
+  this._init(path, iconLoader, notificationSource);
 }
 
 Editor.prototype = {
   __proto__: ModalDialog.ModalDialog.prototype,
 
-  _init: function(path, source) {
+  _init: function(path, iconLoader, notificationSource) {
     ModalDialog.ModalDialog.prototype._init.call(this);
 
-    this._notificationSource = source;
-    this._icons = new Icons.Loader(path)
+    this._icons = iconLoader;
+    this._source = notificationSource;
     this._settingsFile = Gio.file_new_for_path(path).get_child('preferences.json');
 
     this._buildControls();
