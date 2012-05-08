@@ -48,6 +48,13 @@ Indicator.prototype = {
     this._leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     this._leftMenu.actor.hide();
 
+    this._unnableToConnectLabel = new St.Label({
+      text: 'Unable to connect..',
+      style_class: 'cistatus-menu-label'
+    });
+
+    this._leftMenu.addActor(this._unnableToConnectLabel);
+
     this._projectsMenuItems = [];
 
     this._rightMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
@@ -128,6 +135,14 @@ Indicator.prototype = {
   _onGlobalStatusChanged: function() {
     this.actor.destroy_children();
     this.actor.add_actor(this._icons.get(this._globalStatus));
+
+    if (this._globalStatus == 'cistatus-unknown'){
+      this._removeProjectsMenuItems();
+      this._unnableToConnectLabel.show();
+    }
+    else {
+      this._unnableToConnectLabel.hide();
+    }
   },
 
   // Disconnect event signals and remove projects menu items
