@@ -185,9 +185,8 @@ Indicator.prototype = {
       this._leftMenu.addMenuItem(menuItem);
     }
 
-    let globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
-    this.actor.destroy_children();
-    this.actor.add_actor(this._icons.get(globalStatus));
+    this._globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
+    this.emit('global-status-changed');
   },
 
   // Open project url in the default browser
