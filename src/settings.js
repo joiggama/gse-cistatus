@@ -1,5 +1,5 @@
-const ExtSys    = imports.ui.extensionSystem;
-const Extension = ExtSys.extensions['joigama+cistatus@gmail.com'];
+const ExtSys      = imports.ui.extensionSystem;
+const Extension   = ExtSys.extensions['joigama+cistatus@gmail.com'];
 
 const Clutter     = imports.gi.Clutter;
 const Gio         = imports.gi.Gio;
@@ -13,7 +13,7 @@ const St          = imports.gi.St;
 const Main        = imports.ui.main;
 
 // Create texture cache for icons load
-const Texture   = St.TextureCache.get_default();
+const Texture     = St.TextureCache.get_default();
 
 function Editor(path, iconLoader, notificationSource) {
   this._init(path, iconLoader, notificationSource);
@@ -37,52 +37,45 @@ Editor.prototype = {
     this._fields = {};
     this._dialogLayout.add_style_class_name('settings-dialog');
 
-    this._title = new St.Label({ style_class: 'settings-dialog-title' });
-    this._title.set_text(_("Settings - CI Status"));
+    this._title = new St.Label({
+      style_class: 'settings-dialog-title', text: 'Settings - CI Status'
+    });
     this.contentLayout.add(this._title);
 
     this._errorMessages = new St.BoxLayout({
-      style_class: 'settings-error-messages',
-      vertical: true
+      style_class: 'settings-error-messages', vertical: true
     });
-
     this.contentLayout.add(this._errorMessages);
 
-    let urlLabel = new St.Label({ style_class: 'settings-dialog-label' });
-    urlLabel.set_text(_("URL"));
-
-    this._fields.url = new St.Entry({
-      style_class: 'settings-dialog-entry large',
-      can_focus: true
+    let urlLabel = new St.Label({
+      style_class: 'settings-dialog-label', text: 'URL'
     });
-
-    let url = new St.BoxLayout({ vertical: false });
-    url.add(urlLabel);
-    url.add(this._fields.url);
+    this._fields.url = new St.Entry({
+      style_class: 'settings-dialog-entry large', can_focus: true
+    });
+    let urlBox = new St.BoxLayout({ vertical: false });
+    urlBox.add(urlLabel);
+    urlBox.add(this._fields.url);
 
     let intervalLabel = new St.Label({
-      style_class: 'settings-dialog-label short'
+      style_class: 'settings-dialog-label short',
+      text: 'Refresh interval in seconds'
     });
-    intervalLabel.set_text(_("Refresh interval in seconds"));
-
     this._fields.interval = new St.Entry({
       style_class: 'settings-dialog-entry medium'
     });
-
-    let interval = new St.BoxLayout({
-      vertical: false,
-      style_class: 'settings-dialog-fields'
+    let intervalBox = new St.BoxLayout({
+      vertical: false, style_class: 'settings-dialog-fields'
     });
-    interval.add(intervalLabel);
-    interval.add(this._fields.interval);
+    intervalBox.add(intervalLabel);
+    intervalBox.add(this._fields.interval);
 
     let fieldset = new St.BoxLayout({
-      style_class: 'settings-dialog-fields',
-      vertical: true
+      style_class: 'settings-dialog-fields', vertical: true
     });
 
-    fieldset.add(url);
-    fieldset.add(interval);
+    fieldset.add(urlBox);
+    fieldset.add(intervalBox);
 
     this.contentLayout.add(fieldset);
 
@@ -109,10 +102,12 @@ Editor.prototype = {
     this._onOpenedId =this.connect('opened', Lang.bind(this, this._onOpen));
 
     this._onValidationPassedId = this.connect(
-      'preferences-validation-passed', Lang.bind(this, this._onValidationPassed));
+      'preferences-validation-passed', Lang.bind(this, this._onValidationPassed)
+    );
 
     this._onValidationFailedId = this.connect(
-      'preferences-validation-failed', Lang.bind(this, this._onValidationFailed));
+      'preferences-validation-failed', Lang.bind(this, this._onValidationFailed)
+    );
   },
 
   // Disconnect signal handlers
@@ -122,22 +117,24 @@ Editor.prototype = {
     this.disconnect(this._onValidationFailedId);
   },
 
+  // Retrieve modal dialog entry field value
+  _getFieldValue: function(fieldName) {
+    let fieldValue = this._fields[fieldName].get_text();
+    return !(/\D+/.test(fieldValue)) ? parseInt(fieldValue) : fieldValue;
+  },
+
   // Show notification in the system tray
   _notify: function(message, icon){
-    let notification = new MsgTray.Notification(
-      this._source,
-      "cistatus", message,
-      { icon: this._icons.get(icon) }
-    );
+    let notification = new MsgTray.Notification(this._source, "cistatus", message,
+                                                { icon: this._icons.get(icon) });
     this._source.notify(notification);
   },
 
   // Set modal dialog default focus and fill with stored preferences if the exist
   _onOpen: function() {
     if (this.preferences != undefined) {
-      this._fields.url.clutter_text.set_text(this.preferences.url);
-      this._fields.interval.clutter_text.set_text(
-        this.preferences.interval.toString());
+      this._setFieldValue('url', this.get('url'));
+      this._setFieldValue('interval', this.get('interval'));
     }
     this._fields.url.grab_key_focus();
   },
@@ -155,8 +152,8 @@ Editor.prototype = {
   _onValidationPassed: function() {
     this._errorMessages.destroy_children();
 
-    this.preferences.url = this._fields.url.clutter_text.get_text();
-    this.preferences.interval = parseInt(this._fields.interval.clutter_text.get_text());
+    this.preferences.url = this._getFieldValue('url');
+    this.preferences.interval = this._getFieldValue('interval');
 
     if (this.write()) {
       this._notify('The preferences were saved correctly.', 'cistatus-settings')
@@ -169,10 +166,15 @@ Editor.prototype = {
     this.emit('preferences-validation-' + (this._validate() ? 'passed' : 'failed'));
   },
 
+  // Set modal dialog entry field value
+  _setFieldValue: function(fieldName, value) {
+    this._fields[fieldName].set_text(value.toString());
+  },
+
   // Validation of settings modal dialog fields
   _validate: function() {
-    let url = this._fields.url.clutter_text.get_text();
-    let interval = parseInt(this._fields.interval.clutter_text.get_text());
+    let url = this._getFieldValue('url');
+    let interval = this._getFieldValue('interval');
 
     this._errors = [];
 
@@ -195,6 +197,11 @@ Editor.prototype = {
 
   enable: function() {
     this._connectControls();
+  },
+
+  // Preferences getter
+  get: function(property) {
+    return this.preferences[property];
   },
 
   // Read from settings file preferences.json
