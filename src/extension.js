@@ -19,9 +19,6 @@ const Session = new Soup.SessionAsync();
 // Allow Session to work under a proxy http://goo.gl/KKCYe
 Soup.Session.prototype.add_feature.call(Session, new Soup.ProxyResolverDefault());
 
-// Create texture cache for icons load
-const Texture = St.TextureCache.get_default();
-
 function Indicator(metadata) {
   this._init(metadata)
 }
