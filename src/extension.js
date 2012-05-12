@@ -9,6 +9,7 @@ const Mainloop  = imports.mainloop;
 const MsgTray   = imports.ui.messageTray;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const Projects  = Extension.projectsDialog;
 const Settings  = Extension.settings;
 const Signals   = imports.signals;
 const Soup      = imports.gi.Soup;
@@ -31,6 +32,8 @@ Indicator.prototype = {
 
     this._icons = new Icons.Loader(metadata.path);
     this._source = new MsgTray.SystemNotificationSource();
+
+    this._projects = new Projects.Dialog(metadata.path, this._icons, this._source);
     this._settings = new Settings.Editor(metadata.path, this._icons, this._source);
 
     this._buildControls();
@@ -57,6 +60,9 @@ Indicator.prototype = {
     this._rightMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     this._rightMenu.actor.hide();
 
+    this._projectsMenuItem = this._newMenuItem("Projects");
+    this._rightMenu.addMenuItem(this._projectsMenuItem);
+
     this._settingsMenuItem = this._newMenuItem("Settings");
     this._settingsMenuItem.addActor(this._icons.get('cistatus-settings'));
     this._rightMenu.addMenuItem(this._settingsMenuItem);
@@ -66,6 +72,10 @@ Indicator.prototype = {
   _connectControls: function() {
     this._indicatorOnClickId = this.actor.connect(
       'button-press-event', Lang.bind(this, this._onClick)
+    );
+
+    this._projectsMenuItemOnClickId = this._projectsMenuItem.actor.connect(
+      'button-press-event', Lang.bind(this._projects, this._projects.open)
     );
 
     this._settingsMenuItemOnClickId =  this._settingsMenuItem.actor.connect(
@@ -80,6 +90,7 @@ Indicator.prototype = {
   // Disconnect signal handlers
   _disconnectControls: function() {
     this.actor.disconnect(this._indicatorOnClickId);
+    this._projectsMenuItem.actor.disconnect(this._projectsMenuItemOnClickId);
     this._settingsMenuItem.actor.disconnect(this._settingsMenuItemOnClickId);
     this.disconnect(this._onGlobalStatusChangedId);
   },
