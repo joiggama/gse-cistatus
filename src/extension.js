@@ -74,6 +74,14 @@ Indicator.prototype = {
       'button-press-event', Lang.bind(this, this._onClick)
     );
 
+    this._onGlobalStatusChangeId = this.connect(
+      'global-status-change', Lang.bind(this, this._onGlobalStatusChange)
+    );
+
+    this._onProjectsRefreshId = this.connect(
+      'projects-refresh', Lang.bind(this, this._onProjectsRefresh)
+    );
+
     this._projectsMenuItemOnClickId = this._projectsMenuItem.actor.connect(
       'button-press-event', Lang.bind(this._projects, this._projects.open)
     );
@@ -82,21 +90,21 @@ Indicator.prototype = {
       'button-press-event', Lang.bind(this._settings, this._settings.open)
     );
 
-    this._onGlobalStatusChangeId = this.connect(
-      'global-status-changed', Lang.bind(this, this._onGlobalStatusChange)
-    );
   },
 
   // Disconnect signal handlers
   _disconnectControls: function() {
     this.actor.disconnect(this._indicatorOnClickId);
+    this.disconnect(this._onGlobalStatusChangeId);
+    this.disconnect(this._onProjectsRefreshId);
     this._projectsMenuItem.actor.disconnect(this._projectsMenuItemOnClickId);
     this._settingsMenuItem.actor.disconnect(this._settingsMenuItemOnClickId);
-    this.disconnect(this._onGlobalStatusChangeId);
   },
 
   // Get CI's report
   _getStatusReport: function() {
+    this.emit('projects-refresh');
+
     let message = Soup.Message.new('GET', this._settings.preferences.url);
 
     let self = this;
@@ -108,7 +116,7 @@ Indicator.prototype = {
       }
       else {
         self._globalStatus = 'cistatus-unknown';
-        self.emit('global-status-changed');
+        self.emit('global-status-change');
       }
     });
 
@@ -151,6 +159,12 @@ Indicator.prototype = {
     else {
       this._unnableToConnectLabel.hide();
     }
+  },
+
+  // Handle projects refresh: Change indicator icon
+  _onProjectsRefresh: function() {
+    this._globalStatus = 'refresh';
+    this.emit('global-status-change');
   },
 
   // Disconnect event signals and remove projects menu items
@@ -209,7 +223,7 @@ Indicator.prototype = {
     }
 
     this._globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
-    this.emit('global-status-changed');
+    this.emit('global-status-change');
   },
 
   // Open project url in the default browser
