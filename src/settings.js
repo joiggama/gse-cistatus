@@ -81,17 +81,13 @@ Editor.prototype = {
 
     let saveButton = {
       label: "Save",
-      action: Lang.bind(this, function() {
-        this._save();
-      })
+      action: Lang.bind(this, this._save)
     };
 
     let cancelButton = {
       label: "Cancel",
       key: Clutter.KEY_Escape,
-      action: Lang.bind(this, function() {
-        this.close()
-      })
+      action: Lang.bind(this, this.close)
     };
 
     this.setButtons([saveButton, cancelButton]);
