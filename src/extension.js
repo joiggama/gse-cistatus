@@ -82,8 +82,8 @@ Indicator.prototype = {
       'button-press-event', Lang.bind(this._settings, this._settings.open)
     );
 
-    this._onGlobalStatusChangedId = this.connect(
-      'global-status-changed', Lang.bind(this, this._onGlobalStatusChanged)
+    this._onGlobalStatusChangeId = this.connect(
+      'global-status-changed', Lang.bind(this, this._onGlobalStatusChange)
     );
   },
 
@@ -92,7 +92,7 @@ Indicator.prototype = {
     this.actor.disconnect(this._indicatorOnClickId);
     this._projectsMenuItem.actor.disconnect(this._projectsMenuItemOnClickId);
     this._settingsMenuItem.actor.disconnect(this._settingsMenuItemOnClickId);
-    this.disconnect(this._onGlobalStatusChangedId);
+    this.disconnect(this._onGlobalStatusChangeId);
   },
 
   // Get CI's report
@@ -140,7 +140,7 @@ Indicator.prototype = {
   },
 
   // On global status changed callback
-  _onGlobalStatusChanged: function() {
+  _onGlobalStatusChange: function() {
     this.actor.destroy_children();
     this.actor.add_actor(this._icons.get(this._globalStatus));
 
