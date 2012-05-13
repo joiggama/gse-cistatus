@@ -152,7 +152,7 @@ Editor.prototype = {
     this.preferences.interval = this._getFieldValue('interval');
 
     if (this.write()) {
-      this._notify('The preferences were saved correctly.', 'cistatus-settings')
+      this._notify('The preferences were saved correctly.', 'settings-gear')
       this.close();
     }
   },

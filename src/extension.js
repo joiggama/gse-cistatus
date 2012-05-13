@@ -43,7 +43,7 @@ Indicator.prototype = {
 
   // Build indicator controls
   _buildControls: function() {
-    this.actor.add_actor(this._icons.get('cistatus-settings'));
+    this.actor.add_actor(this._icons.get('settings-gear'));
 
     this._leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     this._leftMenu.actor.hide();
@@ -64,7 +64,7 @@ Indicator.prototype = {
     this._rightMenu.addMenuItem(this._projectsMenuItem);
 
     this._settingsMenuItem = this._newMenuItem("Settings");
-    this._settingsMenuItem.addActor(this._icons.get('cistatus-settings'));
+    this._settingsMenuItem.addActor(this._icons.get('settings-gear'));
     this._rightMenu.addMenuItem(this._settingsMenuItem);
   },
 
@@ -115,7 +115,7 @@ Indicator.prototype = {
         self._updateStatus(new XML(data));
       }
       else {
-        self._globalStatus = 'cistatus-unknown';
+        self._globalStatus = 'status-unknown';
         self.emit('global-status-change');
       }
     });
@@ -152,7 +152,7 @@ Indicator.prototype = {
     this.actor.destroy_children();
     this.actor.add_actor(this._icons.get(this._globalStatus));
 
-    if (this._globalStatus == 'cistatus-unknown'){
+    if (this._globalStatus == 'status-unknown'){
       this._removeProjectsMenuItems();
       this._unnableToConnectLabel.show();
     }
@@ -163,7 +163,7 @@ Indicator.prototype = {
 
   // Handle projects refresh: Change indicator icon
   _onProjectsRefresh: function() {
-    this._globalStatus = 'refresh';
+    this._globalStatus = 'status-refresh';
     this.emit('global-status-change');
   },
 
@@ -195,14 +195,14 @@ Indicator.prototype = {
 
       switch(projectStatus) {
         case 'Success':
-          iconName = 'cistatus-green';
+          iconName = 'status-pass';
           break;
         case 'Failure':
-          iconName = 'cistatus-red';
+          iconName = 'status-fail';
           anyFailure = true;
           break;
         default:
-          iconName = 'cistatus-unknown';
+          iconName = 'status-unknown';
       }
 
       let menuItem = this._newMenuItem(projectName);
@@ -222,7 +222,7 @@ Indicator.prototype = {
       this._leftMenu.addMenuItem(menuItem);
     }
 
-    this._globalStatus = anyFailure == true ? 'cistatus-red' : 'cistatus-green';
+    this._globalStatus = anyFailure == true ? 'status-fail' : 'status-pass';
     this.emit('global-status-change');
   },
 
