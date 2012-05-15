@@ -233,7 +233,7 @@ Indicator.prototype = {
   },
 
   enable: function() {
-    Main.panel._rightBox.add_actor(this.actor, 0);
+    Main.panel._rightBox.insert_child_at_index(this.actor, 0);
     Main.uiGroup.add_actor(this._rightMenu.actor);
     Main.panel._menus.addMenu(this._rightMenu);
     Main.uiGroup.add_actor(this._leftMenu.actor);
