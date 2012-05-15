@@ -39,7 +39,6 @@ Indicator.prototype = {
     this._buildControls();
 
     Main.messageTray.add(this._source); // Should I move this somewhere else ?
-    self = this;
   },
 
   // Build indicator controls
