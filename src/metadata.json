@@ -1,5 +1,5 @@
 {
-  "shell-version": ["3.2.2.1"],
+  "shell-version": ["3.4.1"],
   "uuid": "joigama+cistatus@gmail.com",
   "name": "CI Status",
   "description": "A status indicator for your continuous integration server builds",

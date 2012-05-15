@@ -1,16 +1,16 @@
-const ExtSys    = imports.ui.extensionSystem;
-const Extension = ExtSys.extensions['joigama+cistatus@gmail.com'];
+const ExtUtils  = imports.ui.extensionSystem.ExtensionUtils;
+const Extension = ExtUtils.getCurrentExtension();
 
 const GLib      = imports.gi.GLib;
-const Icons     = Extension.iconLoader;
+const Icons     = Extension.imports.iconLoader;
 const Lang      = imports.lang;
 const Main      = imports.ui.main;
 const Mainloop  = imports.mainloop;
 const MsgTray   = imports.ui.messageTray;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const Projects  = Extension.projectsDialog;
-const Settings  = Extension.settings;
+const Projects  = Extension.imports.projectsDialog;
+const Settings  = Extension.imports.settings;
 const Signals   = imports.signals;
 const Soup      = imports.gi.Soup;
 const St        = imports.gi.St;
@@ -39,6 +39,7 @@ Indicator.prototype = {
     this._buildControls();
 
     Main.messageTray.add(this._source); // Should I move this somewhere else ?
+    self = this;
   },
 
   // Build indicator controls
@@ -149,7 +150,7 @@ Indicator.prototype = {
 
   // On global status changed callback
   _onGlobalStatusChange: function() {
-    this.actor.destroy_children();
+    this.actor.destroy_all_children();
     this.actor.add_actor(this._icons.get(this._globalStatus));
 
     if (this._globalStatus == 'status-unknown'){
@@ -172,7 +173,7 @@ Indicator.prototype = {
      if(this._projectsMenuItems.length > 0) {
       for each(let projectMenuItem in this._projectsMenuItems) {
         projectMenuItem.menu_item.actor.disconnect(projectMenuItem.event_id);
-        projectMenuItem.menu_item.actor.destroy_children();
+        projectMenuItem.menu_item.actor.destroy_all_children();
       };
       this._projectsMenuItems = [];
       this._leftMenu.removeAll();
@@ -233,7 +234,7 @@ Indicator.prototype = {
   },
 
   enable: function() {
-    Main.panel._rightBox.insert_actor(this.actor, 0);
+    Main.panel._rightBox.add_actor(this.actor, 0);
     Main.uiGroup.add_actor(this._rightMenu.actor);
     Main.panel._menus.addMenu(this._rightMenu);
     Main.uiGroup.add_actor(this._leftMenu.actor);

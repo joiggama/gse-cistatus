@@ -1,9 +1,9 @@
-const ExtSys      = imports.ui.extensionSystem;
-const Extension   = ExtSys.extensions['joigama+cistatus@gmail.com'];
+const ExtUtils    = imports.ui.extensionSystem.ExtensionUtils;
+const Extension   = ExtUtils.getCurrentExtension();
 
 const Clutter     = imports.gi.Clutter;
 const Gio         = imports.gi.Gio;
-const Icons       = Extension.iconLoader;
+const Icons       = Extension.imports.iconLoader;
 const Lang        = imports.lang;
 const ModalDialog = imports.ui.modalDialog;
 const MsgTray     = imports.ui.messageTray;
@@ -146,7 +146,7 @@ Editor.prototype = {
 
   // Callback for preferences-validation-passed signal to fire settings write
   _onValidationPassed: function() {
-    this._errorMessages.destroy_children();
+    this._errorMessages.destroy_all_children();
 
     this.preferences.url = this._getFieldValue('url');
     this.preferences.interval = this._getFieldValue('interval');
