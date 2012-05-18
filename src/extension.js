@@ -61,6 +61,7 @@ Indicator.prototype = {
     this._rightMenu.actor.hide();
 
     this._projectsMenuItem = this._newMenuItem("Projects");
+    this._projectsMenuItem.addActor(this._icons.get('projects'));
     this._rightMenu.addMenuItem(this._projectsMenuItem);
 
     this._settingsMenuItem = this._newMenuItem("Settings");
