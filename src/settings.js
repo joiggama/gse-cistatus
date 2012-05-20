@@ -122,7 +122,7 @@ Editor.prototype = {
   // Show notification in the system tray
   _notify: function(message, icon){
     let notification = new MsgTray.Notification(this._source, "cistatus", message,
-                                                { icon: this._icons.get(icon) });
+                                                { icon: this._icons.get(icon + '.png') });
     this._source.notify(notification);
   },
 

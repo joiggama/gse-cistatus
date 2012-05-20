@@ -12,7 +12,7 @@ Loader.prototype = {
 
   // Declare icon getter
   get: function(iconName) {
-    let iconUri = this._iconsPath + iconName + '.png';
+    let iconUri = this._iconsPath + iconName;
     return Texture.load_uri_async(iconUri, 16, 16);
   }
 };

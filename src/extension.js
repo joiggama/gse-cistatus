@@ -43,7 +43,7 @@ Indicator.prototype = {
 
   // Build indicator controls
   _buildControls: function() {
-    this.actor.add_actor(this._icons.get('settings-gear'));
+    this.actor.add_actor(this._icons.get('settings-gear.png'));
 
     this._leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     this._leftMenu.actor.hide();
@@ -61,11 +61,11 @@ Indicator.prototype = {
     this._rightMenu.actor.hide();
 
     this._projectsMenuItem = this._newMenuItem("Projects");
-    this._projectsMenuItem.addActor(this._icons.get('projects'));
+    this._projectsMenuItem.addActor(this._icons.get('projects.png'));
     this._rightMenu.addMenuItem(this._projectsMenuItem);
 
     this._settingsMenuItem = this._newMenuItem("Settings");
-    this._settingsMenuItem.addActor(this._icons.get('settings-gear'));
+    this._settingsMenuItem.addActor(this._icons.get('settings-gear.png'));
     this._rightMenu.addMenuItem(this._settingsMenuItem);
   },
 
@@ -151,7 +151,7 @@ Indicator.prototype = {
   // On global status changed callback
   _onGlobalStatusChange: function() {
     this.actor.destroy_all_children();
-    this.actor.add_actor(this._icons.get(this._globalStatus));
+    this.actor.add_actor(this._icons.get(this._globalStatus + '.png'));
 
     if (this._globalStatus == 'status-unknown'){
       this._removeProjectsMenuItems();
@@ -207,7 +207,7 @@ Indicator.prototype = {
       }
 
       let menuItem = this._newMenuItem(projectName);
-      menuItem.addActor(this._icons.get(iconName));
+      menuItem.addActor(this._icons.get(iconName + '.png'));
 
       let menuItemOnClickId = menuItem.actor.connect(
         'button-press-event', Lang.bind(this, function() {
