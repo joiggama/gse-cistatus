@@ -39,6 +39,7 @@ Dialog.prototype = {
       style_class: 'settings-dialog-entry large',
       can_focus: true
     });
+    this._fields.url.set_secondary_icon(this._icons.get('find.svg'));
 
     let urlBox = new St.BoxLayout({ vertical: false });
     urlBox.add(urlLabel);
@@ -70,6 +71,8 @@ Dialog.prototype = {
 
   // Connect signal handlers
   _connectControls: function() {
+    this._onOpenedId =this.connect('opened', Lang.bind(this, this._onOpen));
+
     this._urlFieldOnReturnId = this._fields.url.clutter_text.connect(
       'key-press-event', Lang.bind(this, this._onUrlFieldKeyPress)
     );
@@ -77,7 +80,13 @@ Dialog.prototype = {
 
   // Disconnect signal handlers
   _disconnectControls: function() {
+    this.disconnect(this._onOpenedId);
     this._fields.url.clutter_text.disconnect(this._urlFieldOnReturnId);
+  },
+
+  // Set modal dialog default focus
+  _onOpen: function() {
+    this._fields.url.grab_key_focus();
   },
 
   // Handle URL field key press event
