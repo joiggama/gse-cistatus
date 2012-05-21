@@ -1,7 +1,15 @@
+const CheckBox    = imports.ui.checkBox;
 const Clutter     = imports.gi.Clutter;
+const Gtk         = imports.gi.Gtk;
 const Lang        = imports.lang;
 const ModalDialog = imports.ui.modalDialog;
+const Soup        = imports.gi.Soup;
 const St          = imports.gi.St;
+
+// Prevent Session from being garbage collected http://goo.gl/KKCYe
+const Session = new Soup.SessionAsync();
+// Allow Session to work under a proxy http://goo.gl/KKCYe
+Soup.Session.prototype.add_feature.call(Session, new Soup.ProxyResolverDefault());
 
 function Dialog(path, iconLoader, notificationSource) {
   this._init(path, iconLoader, notificationSource);
@@ -45,10 +53,27 @@ Dialog.prototype = {
     urlBox.add(urlLabel);
     urlBox.add(this._fields.url);
 
-    let projectsList = new St.BoxLayout({
-      vertical: false,
+    this._projectsArea = new St.ScrollView({
+      vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
+      hscrollbar_policy: Gtk.PolicyType.NEVER,
+      style_class: 'cistatus-projects-area'
+    });
+
+    let projectsBox = new St.BoxLayout({ vertical: false });
+
+    this._leftProjectsList = new St.BoxLayout({
+      vertical: true,
       style_class: 'cistatus-projects-list'
     });
+
+    this._rightProjectsList = new St.BoxLayout({
+      vertical: true,
+      style_class: 'cistatus-projects-list'
+    });
+
+    projectsBox.add(this._leftProjectsList);
+    projectsBox.add(this._rightProjectsList);
+    this._projectsArea.add_actor(projectsBox);
 
     let fieldset = new St.BoxLayout({
       style_class: 'settings-dialog-fields',
@@ -56,7 +81,7 @@ Dialog.prototype = {
     });
 
     fieldset.add(urlBox);
-    fieldset.add(projectsList);
+    fieldset.add(this._projectsArea);
 
     this.contentLayout.add(fieldset);
 
@@ -73,7 +98,7 @@ Dialog.prototype = {
   _connectControls: function() {
     this._onOpenedId =this.connect('opened', Lang.bind(this, this._onOpen));
 
-    this._urlFieldOnReturnId = this._fields.url.clutter_text.connect(
+    this._onUrlFieldKeyPressId = this._fields.url.clutter_text.connect(
       'key-press-event', Lang.bind(this, this._onUrlFieldKeyPress)
     );
   },
@@ -81,7 +106,34 @@ Dialog.prototype = {
   // Disconnect signal handlers
   _disconnectControls: function() {
     this.disconnect(this._onOpenedId);
-    this._fields.url.clutter_text.disconnect(this._urlFieldOnReturnId);
+    this._fields.url.clutter_text.disconnect(this._onUrlFieldKeyPressId);
+  },
+
+  // Retrieve projects list from ci given its url
+  _getProjectsList: function() {
+    let message = Soup.Message.new('GET', this._fields.url.get_text());
+
+    let self = this;
+
+    Session.queue_message(message, function() {
+      data = message.response_body.data;
+      if (data != null) {
+        let parsedData = new XML(data);
+        let projectsCount = parsedData.Project.length();
+        let count = 0;
+        for each(let project in parsedData.Project) {
+          count++;
+          let projectCheckBox = new CheckBox.CheckBox(project.@name.toString());
+          if (count <= (projectsCount/2)) {
+            self._leftProjectsList.add(projectCheckBox.actor);
+          }
+          else {
+            self._rightProjectsList.add(projectCheckBox.actor);
+          }
+        };
+      }
+    });
+
   },
 
   // Set modal dialog default focus
@@ -91,8 +143,8 @@ Dialog.prototype = {
 
   // Handle URL field key press event
   _onUrlFieldKeyPress: function(actor, event) {
-    if (event.get_key_symbol() == Clutter.Return){
-      return undefined;
+    if (event.get_key_symbol() == Clutter.Return) {
+      this._getProjectsList();
     };
   },
 

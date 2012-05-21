@@ -53,9 +53,15 @@
   width: 322px;
 }
 
-.cistatus-projects-list {
-  height: 200px;
+.cistatus-projects-area {
+  max-height: 150px;
+  padding-top: 20px;
 }
+
+.cistatus-projects-list {
+  width: 245px;
+}
+
 .short {
   width: 155px;
 }
