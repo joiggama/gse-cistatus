@@ -8,151 +8,149 @@ const St          = imports.gi.St;
 
 // Prevent Session from being garbage collected http://goo.gl/KKCYe
 const Session = new Soup.SessionAsync();
+
 // Allow Session to work under a proxy http://goo.gl/KKCYe
-Soup.Session.prototype.add_feature.call(Session, new Soup.ProxyResolverDefault());
+Soup.Session.prototype.add_feature.call(Session,
+                                        new Soup.ProxyResolverDefault());
 
 function Dialog(path, iconLoader, notificationSource) {
-  this._init(path, iconLoader, notificationSource);
+    this._init(path, iconLoader, notificationSource);
 }
 
 Dialog.prototype = {
-  __proto__: ModalDialog.ModalDialog.prototype,
 
-  _init: function(path, iconLoader, notificationSource) {
-    ModalDialog.ModalDialog.prototype._init.call(this);
+    __proto__: ModalDialog.ModalDialog.prototype,
 
-    this._icons = iconLoader;
-    this._buildControls();
-    this.enable();
-  },
+    _init: function(path, iconLoader, notificationSource) {
+        ModalDialog.ModalDialog.prototype._init.call(this);
 
-  // Build modal dialog controls
-  _buildControls: function() {
-    this._fields = {};
-    this._dialogLayout.add_style_class_name('settings-dialog');
+        this._icons = iconLoader;
+        this._buildControls();
+        this.enable();
+    },
 
-    this._title = new St.Label({
-      style_class: 'settings-dialog-title',
-      text: 'Projects - CI Status'
-    });
+    // Build modal dialog controls
+    _buildControls: function() {
+        this._dialogLayout.add_style_class_name('settings-dialog');
 
-    this.contentLayout.add(this._title);
+        this._title = new St.Label({ style_class: 'settings-dialog-title',
+                                     text: 'Projects - CI Status' });
 
-    let urlLabel = new St.Label({
-      style_class: 'settings-dialog-label',
-      text: 'URL'
-    });
+        this.contentLayout.add(this._title);
 
-    this._fields.url = new St.Entry({
-      style_class: 'settings-dialog-entry large',
-      can_focus: true
-    });
-    this._fields.url.set_secondary_icon(this._icons.get('find.svg'));
+        let urlLabel = new St.Label({ style_class: 'settings-dialog-label',
+                                      text: 'URL' });
 
-    let urlBox = new St.BoxLayout({ vertical: false });
-    urlBox.add(urlLabel);
-    urlBox.add(this._fields.url);
+        this._url = new St.Entry({ style_class: 'settings-dialog-entry large',
+                                   can_focus: true });
 
-    this._projectsArea = new St.ScrollView({
-      vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
-      hscrollbar_policy: Gtk.PolicyType.NEVER,
-      style_class: 'cistatus-projects-area'
-    });
+        this._url.set_secondary_icon(this._icons.get('find.svg'));
 
-    let projectsBox = new St.BoxLayout({ vertical: false });
+        let urlBox = new St.BoxLayout({ vertical: false });
+        urlBox.add(urlLabel);
+        urlBox.add(this._url);
 
-    this._leftProjectsList = new St.BoxLayout({
-      vertical: true,
-      style_class: 'cistatus-projects-list'
-    });
+        this._projectsArea = new St.ScrollView({
+            style_class: 'cistatus-projects-area',
+            vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
+            hscrollbar_policy: Gtk.PolicyType.NEVER
+        });
 
-    this._rightProjectsList = new St.BoxLayout({
-      vertical: true,
-      style_class: 'cistatus-projects-list'
-    });
+        let projectsBox = new St.BoxLayout({ vertical: false });
 
-    projectsBox.add(this._leftProjectsList);
-    projectsBox.add(this._rightProjectsList);
-    this._projectsArea.add_actor(projectsBox);
+        this._leftProjectsList = new St.BoxLayout({
+            style_class: 'cistatus-projects-list',
+            vertical: true
+        });
 
-    let fieldset = new St.BoxLayout({
-      style_class: 'settings-dialog-fields',
-      vertical: true
-    });
+        this._rightProjectsList = new St.BoxLayout({
+            style_class: 'cistatus-projects-list',
+            vertical: true
+        });
 
-    fieldset.add(urlBox);
-    fieldset.add(this._projectsArea);
+        projectsBox.add(this._leftProjectsList);
+        projectsBox.add(this._rightProjectsList);
 
-    this.contentLayout.add(fieldset);
+        this._projectsArea.add_actor(projectsBox);
 
-    let closeButton = {
-      label: 'Close',
-      key: Clutter.KEY_Escape,
-      action: Lang.bind(this, this.close)
-    };
+        let fieldset = new St.BoxLayout({ style_class: 'settings-dialog-fields',
+                                          vertical: true });
 
-    this.setButtons([closeButton]);
-  },
+        fieldset.add(urlBox);
+        fieldset.add(this._projectsArea);
 
-  // Connect signal handlers
-  _connectControls: function() {
-    this._onOpenedId =this.connect('opened', Lang.bind(this, this._onOpen));
+        this.contentLayout.add(fieldset);
 
-    this._onUrlFieldKeyPressId = this._fields.url.clutter_text.connect(
-      'key-press-event', Lang.bind(this, this._onUrlFieldKeyPress)
-    );
-  },
+        let closeButton = { label: 'Close',
+                            key: Clutter.KEY_Escape,
+                            action: Lang.bind(this, this.close) };
 
-  // Disconnect signal handlers
-  _disconnectControls: function() {
-    this.disconnect(this._onOpenedId);
-    this._fields.url.clutter_text.disconnect(this._onUrlFieldKeyPressId);
-  },
+        this.setButtons([closeButton]);
+    },
 
-  // Retrieve projects list from ci given its url
-  _getProjectsList: function() {
-    let message = Soup.Message.new('GET', this._fields.url.get_text());
+    // Connect signal handlers
+    _connectControls: function() {
+        this._onOpenedId =this.connect('opened', Lang.bind(this, this._onOpen));
 
-    let self = this;
+        let url = this._url.clutter_text;
+        this._onUrlKeyPressId = url.connect('key-press-event',
+                                            Lang.bind(this,
+                                                      this._onUrlKeyPress));
+    },
 
-    Session.queue_message(message, function() {
-      data = message.response_body.data;
-      if (data != null) {
-        let parsedData = new XML(data);
-        let projectsCount = parsedData.Project.length();
-        let count = 0;
-        for each(let project in parsedData.Project) {
-          count++;
-          let projectCheckBox = new CheckBox.CheckBox(project.@name.toString());
-          if (count <= (projectsCount/2)) {
-            self._leftProjectsList.add(projectCheckBox.actor);
-          }
-          else {
-            self._rightProjectsList.add(projectCheckBox.actor);
-          }
+    // Disconnect signal handlers
+    _disconnectControls: function() {
+        this.disconnect(this._onOpenedId);
+        this._url.clutter_text.disconnect(this._onUrlKeyPressId);
+    },
+
+    // Retrieve projects list from ci given its url
+    _getProjectsList: function() {
+        let message = Soup.Message.new('GET', this._url.get_text());
+
+        let self = this;
+
+        Session.queue_message(message, function() {
+            let data = message.response_body.data;
+            if (data != null) {
+                let parsedData = new XML(data);
+                let projectsCount = parsedData.Project.length();
+                let count = 0;
+
+                for each(let project in parsedData.Project) {
+                    count++;
+                    let projectName = project.@name.toString();
+                    let projectCheckBox = new CheckBox.CheckBox(projectName);
+
+                    if (count <= (projectsCount/2)) {
+                        self._leftProjectsList.add(projectCheckBox.actor);
+                    }
+                    else {
+                        self._rightProjectsList.add(projectCheckBox.actor);
+                    };
+                };
+            };
+        });
+
+    },
+
+    // Set modal dialog default focus
+    _onOpen: function() {
+        this._url.grab_key_focus();
+    },
+
+    // Handle URL field key press event
+    _onUrlKeyPress: function(actor, event) {
+        if (event.get_key_symbol() == Clutter.Return) {
+            this._getProjectsList();
         };
-      }
-    });
+    },
 
-  },
+    disable: function() {
+        this._disconnectControls();
+    },
 
-  // Set modal dialog default focus
-  _onOpen: function() {
-    this._fields.url.grab_key_focus();
-  },
-
-  // Handle URL field key press event
-  _onUrlFieldKeyPress: function(actor, event) {
-    if (event.get_key_symbol() == Clutter.Return) {
-      this._getProjectsList();
-    };
-  },
-
-  disable: function() {
-    this._disconnectControls();
-  },
-
-  enable: function() {
-    this._connectControls();
-  },
+    enable: function() {
+        this._connectControls();
+    }
 }
