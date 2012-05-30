@@ -88,6 +88,12 @@ Dialog.prototype = {
         this.setButtons([closeButton]);
     },
 
+    // Remove projects list items
+    _clearProjectsList: function() {
+        this._leftProjectsList.destroy_all_children();
+        this._rightProjectsList.destroy_all_children();
+    },
+
     // Connect signal handlers
     _connectControls: function() {
         this._onOpenedId =this.connect('opened', Lang.bind(this, this._onOpen));
@@ -106,6 +112,7 @@ Dialog.prototype = {
 
     // Retrieve projects list from ci given its url
     _retrieveProjectsList: function() {
+        this._clearProjectsList();
         let message = Soup.Message.new('GET', this._url.get_text());
 
         let self = this;
