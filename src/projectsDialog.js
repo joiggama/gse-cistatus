@@ -105,7 +105,7 @@ Dialog.prototype = {
     },
 
     // Retrieve projects list from ci given its url
-    _getProjectsList: function() {
+    _retrieveProjectsList: function() {
         let message = Soup.Message.new('GET', this._url.get_text());
 
         let self = this;
@@ -142,7 +142,7 @@ Dialog.prototype = {
     // Handle URL field key press event
     _onUrlKeyPress: function(actor, event) {
         if (event.get_key_symbol() == Clutter.Return) {
-            this._getProjectsList();
+            this._retrieveProjectsList();
         };
     },
 
