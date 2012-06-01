@@ -1,45 +1,48 @@
-const ExtSys    = imports.ui.extensionSystem;
-const Extension = ExtSys.ExtensionUtils.getCurrentExtension();
+const ExtSys         = imports.ui.extensionSystem;
+const Extension      = ExtSys.ExtensionUtils.getCurrentExtension();
 
-const GLib      = imports.gi.GLib;
-const Lang      = imports.lang;
-const Main      = imports.ui.main;
-const Mainloop  = imports.mainloop;
-const MsgTray   = imports.ui.messageTray;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
-const Projects  = Extension.imports.projects;
-const Settings  = Extension.imports.settings;
-const Signals   = imports.signals;
-const Soup      = imports.gi.Soup;
-const St        = imports.gi.St;
+const GLib           = imports.gi.GLib;
+const Lang           = imports.lang;
+const Main           = imports.ui.main;
+const Mainloop       = imports.mainloop;
+const MsgTray        = imports.ui.messageTray;
+const PanelMenu      = imports.ui.panelMenu;
+const PopupMenu      = imports.ui.popupMenu;
+const Projects       = Extension.imports.projects;
+const Settings       = Extension.imports.settings;
+const Signals        = imports.signals;
+const Soup           = imports.gi.Soup;
+const St             = imports.gi.St;
 
-const Utils     = Extension.imports.utils;
-const Icons     = new Utils.Icons();
+const Utils          = Extension.imports.utils;
+const Icons          = new Utils.Icons();
+const ProjectsDialog = new Projects.Dialog();
 
 // Prevent Session from being garbage collected http://goo.gl/KKCYe
-const Session = new Soup.SessionAsync();
+const Session        = new Soup.SessionAsync();
+
 // Allow Session to work under a proxy http://goo.gl/KKCYe
-Soup.Session.prototype.add_feature.call(Session, new Soup.ProxyResolverDefault());
+Soup.Session.prototype.add_feature.call(Session,
+                                        new Soup.ProxyResolverDefault());
 
 function Indicator() {
-  this._init()
+    this._init()
 }
 
 Indicator.prototype = {
+
   __proto__: PanelMenu.ButtonBox.prototype,
 
   _init: function(metadata) {
-    PanelMenu.ButtonBox.prototype._init.call(this, { reactive: true });
+      PanelMenu.ButtonBox.prototype._init.call(this, { reactive: true });
 
-    this._source = new MsgTray.SystemNotificationSource();
+      this._source = new MsgTray.SystemNotificationSource();
 
-    this._projects = new Projects.Dialog();
-    this._settings = new Settings.Editor(this._source);
+      this._settings = new Settings.Editor(this._source);
 
-    this._buildControls();
+      this._buildControls();
 
-    Main.messageTray.add(this._source); // Should I move this somewhere else ?
+      Main.messageTray.add(this._source); // Should I move this somewhere else ?
   },
 
   // Build indicator controls
@@ -85,7 +88,7 @@ Indicator.prototype = {
     );
 
     this._projectsMenuItemOnClickId = this._projectsMenuItem.actor.connect(
-      'button-press-event', Lang.bind(this._projects, this._projects.open)
+      'button-press-event', Lang.bind(ProjectsDialog, ProjectsDialog.open)
     );
 
     this._settingsMenuItemOnClickId =  this._settingsMenuItem.actor.connect(
@@ -243,7 +246,7 @@ Indicator.prototype = {
 
     this._connectControls();
     this._settings.enable();
-    this._projects.enable();
+    ProjectsDialog.enable();
 
     if (this._settings.read()) {
       this._mainloop = Mainloop.timeout_add(0, Lang.bind(this, function() {
@@ -255,7 +258,7 @@ Indicator.prototype = {
   disable: function() {
     Mainloop.source_remove(this._mainloop);
 
-    this._projects.disable();
+    ProjectsDialog.disable();
     this._settings.disable();
     this._disconnectControls();
     this._removeProjectsMenuItems();
