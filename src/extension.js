@@ -2,7 +2,6 @@ const ExtSys    = imports.ui.extensionSystem;
 const Extension = ExtSys.ExtensionUtils.getCurrentExtension();
 
 const GLib      = imports.gi.GLib;
-const Icons     = Extension.imports.iconLoader;
 const Lang      = imports.lang;
 const Main      = imports.ui.main;
 const Mainloop  = imports.mainloop;
@@ -15,13 +14,16 @@ const Signals   = imports.signals;
 const Soup      = imports.gi.Soup;
 const St        = imports.gi.St;
 
+const Utils     = Extension.imports.utils;
+const Icons     = new Utils.Icons();
+
 // Prevent Session from being garbage collected http://goo.gl/KKCYe
 const Session = new Soup.SessionAsync();
 // Allow Session to work under a proxy http://goo.gl/KKCYe
 Soup.Session.prototype.add_feature.call(Session, new Soup.ProxyResolverDefault());
 
-function Indicator(metadata) {
-  this._init(metadata)
+function Indicator() {
+  this._init()
 }
 
 Indicator.prototype = {
@@ -30,11 +32,10 @@ Indicator.prototype = {
   _init: function(metadata) {
     PanelMenu.ButtonBox.prototype._init.call(this, { reactive: true });
 
-    this._icons = new Icons.Loader(metadata.path);
     this._source = new MsgTray.SystemNotificationSource();
 
-    this._projects = new Projects.Dialog(this._source);
-    this._settings = new Settings.Editor(metadata.path, this._icons, this._source);
+    this._projects = new Projects.Dialog();
+    this._settings = new Settings.Editor(this._source);
 
     this._buildControls();
 
@@ -43,7 +44,7 @@ Indicator.prototype = {
 
   // Build indicator controls
   _buildControls: function() {
-    this.actor.add_actor(this._icons.get('settings-gear.png'));
+    this.actor.add_actor(Icons.get('settings-gear.png'));
 
     this._leftMenu = new PopupMenu.PopupMenu(this.actor, 0.0, St.Side.TOP);
     this._leftMenu.actor.hide();
@@ -61,11 +62,11 @@ Indicator.prototype = {
     this._rightMenu.actor.hide();
 
     this._projectsMenuItem = this._newMenuItem("Projects");
-    this._projectsMenuItem.addActor(this._icons.get('projects.png'));
+    this._projectsMenuItem.addActor(Icons.get('projects.png'));
     this._rightMenu.addMenuItem(this._projectsMenuItem);
 
     this._settingsMenuItem = this._newMenuItem("Settings");
-    this._settingsMenuItem.addActor(this._icons.get('settings-gear.png'));
+    this._settingsMenuItem.addActor(Icons.get('settings-gear.png'));
     this._rightMenu.addMenuItem(this._settingsMenuItem);
   },
 
@@ -151,7 +152,7 @@ Indicator.prototype = {
   // On global status changed callback
   _onGlobalStatusChange: function() {
     this.actor.destroy_all_children();
-    this.actor.add_actor(this._icons.get(this._globalStatus + '.png'));
+    this.actor.add_actor(Icons.get(this._globalStatus + '.png'));
 
     if (this._globalStatus == 'status-unknown'){
       this._removeProjectsMenuItems();
@@ -207,7 +208,7 @@ Indicator.prototype = {
       }
 
       let menuItem = this._newMenuItem(projectName);
-      menuItem.addActor(this._icons.get(iconName + '.png'));
+      menuItem.addActor(Icons.get(iconName + '.png'));
 
       let menuItemOnClickId = menuItem.actor.connect(
         'button-press-event', Lang.bind(this, function() {
@@ -269,6 +270,6 @@ Indicator.prototype = {
 
 Signals.addSignalMethods(Indicator.prototype);
 
-function init(metadata) {
-  return new Indicator(metadata)
+function init() {
+  return new Indicator();
 }

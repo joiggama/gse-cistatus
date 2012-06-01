@@ -1,9 +1,8 @@
-const ExtUtils    = imports.ui.extensionSystem.ExtensionUtils;
-const Extension   = ExtUtils.getCurrentExtension();
+const ExtSys      = imports.ui.extensionSystem;
+const Extension   = ExtSys.ExtensionUtils.getCurrentExtension();
 
 const Clutter     = imports.gi.Clutter;
 const Gio         = imports.gi.Gio;
-const Icons       = Extension.imports.iconLoader;
 const Lang        = imports.lang;
 const ModalDialog = imports.ui.modalDialog;
 const MsgTray     = imports.ui.messageTray;
@@ -12,22 +11,21 @@ const Signals     = imports.signals;
 const St          = imports.gi.St;
 const Main        = imports.ui.main;
 
-// Create texture cache for icons load
-const Texture     = St.TextureCache.get_default();
+const Utils       = Extension.imports.utils;
+const Icons       = new Utils.Icons();
 
-function Editor(path, iconLoader, notificationSource) {
-  this._init(path, iconLoader, notificationSource);
+function Editor(notificationSource) {
+  this._init(notificationSource);
 }
 
 Editor.prototype = {
   __proto__: ModalDialog.ModalDialog.prototype,
 
-  _init: function(path, iconLoader, notificationSource) {
+  _init: function(notificationSource) {
     ModalDialog.ModalDialog.prototype._init.call(this);
 
-    this._icons = iconLoader;
     this._source = notificationSource;
-    this._settingsFile = Gio.file_new_for_path(path).get_child('preferences.json');
+    this._settingsFile = Gio.file_new_for_path(Extension.path).get_child('preferences.json');
 
     this._buildControls();
   },
@@ -122,7 +120,7 @@ Editor.prototype = {
   // Show notification in the system tray
   _notify: function(message, icon){
     let notification = new MsgTray.Notification(this._source, "cistatus", message,
-                                                { icon: this._icons.get(icon + '.png') });
+                                                { icon: Icons.get(icon + '.png') });
     this._source.notify(notification);
   },
 
