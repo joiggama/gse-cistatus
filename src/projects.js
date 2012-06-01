@@ -46,7 +46,6 @@ Dialog.prototype = {
           open: function() {
               self.open();
           }
-
         };
 
     },
@@ -55,10 +54,10 @@ Dialog.prototype = {
     _buildControls: function() {
         this._dialogLayout.add_style_class_name('settings-dialog');
 
-        this._title = new St.Label({ style_class: 'settings-dialog-title',
-                                     text: 'Projects - CI Status' });
+        let title = new St.Label({ style_class: 'settings-dialog-title',
+                                   text: 'Projects - CI Status' });
 
-        this.contentLayout.add(this._title);
+        this.contentLayout.add(title);
 
         let urlLabel = new St.Label({ style_class: 'settings-dialog-label',
                                       text: 'URL' });
@@ -72,7 +71,7 @@ Dialog.prototype = {
         urlBox.add(urlLabel);
         urlBox.add(this._url);
 
-        this._projectsArea = new St.ScrollView({
+        let projectsScrollView = new St.ScrollView({
             style_class: 'cistatus-projects-area',
             vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
             hscrollbar_policy: Gtk.PolicyType.NEVER
@@ -93,13 +92,13 @@ Dialog.prototype = {
         projectsBox.add(this._leftProjectsList);
         projectsBox.add(this._rightProjectsList);
 
-        this._projectsArea.add_actor(projectsBox);
+        projectsScrollView.add_actor(projectsBox);
 
         let fieldset = new St.BoxLayout({ style_class: 'settings-dialog-fields',
                                           vertical: true });
 
         fieldset.add(urlBox);
-        fieldset.add(this._projectsArea);
+        fieldset.add(projectsScrollView);
 
         this.contentLayout.add(fieldset);
 
