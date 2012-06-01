@@ -1,5 +1,5 @@
-const ExtUtils  = imports.ui.extensionSystem.ExtensionUtils;
-const Extension = ExtUtils.getCurrentExtension();
+const ExtSys    = imports.ui.extensionSystem;
+const Extension = ExtSys.ExtensionUtils.getCurrentExtension();
 
 const GLib      = imports.gi.GLib;
 const Icons     = Extension.imports.iconLoader;
@@ -9,7 +9,7 @@ const Mainloop  = imports.mainloop;
 const MsgTray   = imports.ui.messageTray;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const Projects  = Extension.imports.projectsDialog;
+const Projects  = Extension.imports.projects;
 const Settings  = Extension.imports.settings;
 const Signals   = imports.signals;
 const Soup      = imports.gi.Soup;
@@ -33,7 +33,7 @@ Indicator.prototype = {
     this._icons = new Icons.Loader(metadata.path);
     this._source = new MsgTray.SystemNotificationSource();
 
-    this._projects = new Projects.Dialog(metadata.path, this._icons, this._source);
+    this._projects = new Projects.Dialog(this._source);
     this._settings = new Settings.Editor(metadata.path, this._icons, this._source);
 
     this._buildControls();

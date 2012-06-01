@@ -1,3 +1,6 @@
+const ExtSys      = imports.ui.extensionSystem;
+const Extension   = ExtSys.ExtensionUtils.getCurrentExtension();
+
 const CheckBox    = imports.ui.checkBox;
 const Clutter     = imports.gi.Clutter;
 const Gtk         = imports.gi.Gtk;
@@ -6,27 +9,29 @@ const ModalDialog = imports.ui.modalDialog;
 const Soup        = imports.gi.Soup;
 const St          = imports.gi.St;
 
+const Utils       = Extension.imports.utils;
+const Icons       = new Utils.Icons();
+
 // Prevent Session from being garbage collected http://goo.gl/KKCYe
-const Session = new Soup.SessionAsync();
+const Session     = new Soup.SessionAsync();
 
 // Allow Session to work under a proxy http://goo.gl/KKCYe
 Soup.Session.prototype.add_feature.call(Session,
                                         new Soup.ProxyResolverDefault());
 
-function Dialog(path, iconLoader, notificationSource) {
-    return this._init(path, iconLoader, notificationSource);
+function Dialog() {
+    return this._init();
 }
 
 Dialog.prototype = {
 
     __proto__: ModalDialog.ModalDialog.prototype,
 
-    _init: function(path, iconLoader, notificationSource) {
+    _init: function() {
         ModalDialog.ModalDialog.prototype._init.call(this);
 
         var self = this;
 
-        this._icons = iconLoader;
         this._buildControls();
 
         return {
@@ -61,7 +66,7 @@ Dialog.prototype = {
         this._url = new St.Entry({ style_class: 'settings-dialog-entry large',
                                    can_focus: true });
 
-        this._url.set_secondary_icon(this._icons.get('find.svg'));
+        this._url.set_secondary_icon(Icons.get('find.svg'));
 
         let urlBox = new St.BoxLayout({ vertical: false });
         urlBox.add(urlLabel);
