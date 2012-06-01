@@ -14,7 +14,7 @@ Soup.Session.prototype.add_feature.call(Session,
                                         new Soup.ProxyResolverDefault());
 
 function Dialog(path, iconLoader, notificationSource) {
-    this._init(path, iconLoader, notificationSource);
+    return this._init(path, iconLoader, notificationSource);
 }
 
 Dialog.prototype = {
@@ -24,9 +24,26 @@ Dialog.prototype = {
     _init: function(path, iconLoader, notificationSource) {
         ModalDialog.ModalDialog.prototype._init.call(this);
 
+        var self = this;
+
         this._icons = iconLoader;
         this._buildControls();
-        this.enable();
+
+        return {
+          disable: function() {
+              self._disconnectControls();
+          },
+
+          enable: function() {
+              self._connectControls();
+          },
+
+          open: function() {
+              self.open();
+          }
+
+        };
+
     },
 
     // Build modal dialog controls
@@ -151,13 +168,6 @@ Dialog.prototype = {
         if (event.get_key_symbol() == Clutter.Return) {
             this._retrieveProjectsList();
         };
-    },
-
-    disable: function() {
-        this._disconnectControls();
-    },
-
-    enable: function() {
-        this._connectControls();
     }
+
 }

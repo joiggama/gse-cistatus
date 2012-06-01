@@ -242,6 +242,7 @@ Indicator.prototype = {
 
     this._connectControls();
     this._settings.enable();
+    this._projects.enable();
 
     if (this._settings.read()) {
       this._mainloop = Mainloop.timeout_add(0, Lang.bind(this, function() {
@@ -253,6 +254,7 @@ Indicator.prototype = {
   disable: function() {
     Mainloop.source_remove(this._mainloop);
 
+    this._projects.disable();
     this._settings.disable();
     this._disconnectControls();
     this._removeProjectsMenuItems();
