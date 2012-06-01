@@ -117,7 +117,7 @@ Dialog.prototype = {
 
     // Connect signal handlers
     _connectControls: function() {
-        this._onOpenedId =this.connect('opened', Lang.bind(this, this._onOpen));
+        this._onOpenId =this.connect('opened', Lang.bind(this, this._onOpen));
 
         let url = this._url.clutter_text;
         this._onUrlKeyPressId = url.connect('key-press-event',
@@ -127,7 +127,7 @@ Dialog.prototype = {
 
     // Disconnect signal handlers
     _disconnectControls: function() {
-        this.disconnect(this._onOpenedId);
+        this.disconnect(this._onOpenId);
         this._url.clutter_text.disconnect(this._onUrlKeyPressId);
     },
 
