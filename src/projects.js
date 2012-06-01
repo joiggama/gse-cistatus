@@ -1,19 +1,19 @@
-const ExtSys      = imports.ui.extensionSystem;
-const Extension   = ExtSys.ExtensionUtils.getCurrentExtension();
+const ExtensionSystem = imports.ui.extensionSystem;
+const Extension       = ExtensionSystem.ExtensionUtils.getCurrentExtension();
 
-const CheckBox    = imports.ui.checkBox;
-const Clutter     = imports.gi.Clutter;
-const Gtk         = imports.gi.Gtk;
-const Lang        = imports.lang;
-const ModalDialog = imports.ui.modalDialog;
-const Soup        = imports.gi.Soup;
-const St          = imports.gi.St;
+const CheckBox        = imports.ui.checkBox;
+const Clutter         = imports.gi.Clutter;
+const Gtk             = imports.gi.Gtk;
+const Lang            = imports.lang;
+const ModalDialog     = imports.ui.modalDialog;
+const Soup            = imports.gi.Soup;
+const St              = imports.gi.St;
 
-const Utils       = Extension.imports.utils;
-const Icons       = new Utils.Icons();
+const Utils           = Extension.imports.utils;
+const Icons           = new Utils.Icons();
 
 // Prevent Session from being garbage collected http://goo.gl/KKCYe
-const Session     = new Soup.SessionAsync();
+const Session         = new Soup.SessionAsync();
 
 // Allow Session to work under a proxy http://goo.gl/KKCYe
 Soup.Session.prototype.add_feature.call(Session,

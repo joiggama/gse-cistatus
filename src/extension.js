@@ -1,25 +1,25 @@
-const ExtSys         = imports.ui.extensionSystem;
-const Extension      = ExtSys.ExtensionUtils.getCurrentExtension();
+const ExtensionSystem = imports.ui.extensionSystem;
+const Extension       = ExtensionSystem.ExtensionUtils.getCurrentExtension();
 
-const GLib           = imports.gi.GLib;
-const Lang           = imports.lang;
-const Main           = imports.ui.main;
-const Mainloop       = imports.mainloop;
-const MsgTray        = imports.ui.messageTray;
-const PanelMenu      = imports.ui.panelMenu;
-const PopupMenu      = imports.ui.popupMenu;
-const Projects       = Extension.imports.projects;
-const Settings       = Extension.imports.settings;
-const Signals        = imports.signals;
-const Soup           = imports.gi.Soup;
-const St             = imports.gi.St;
+const GLib            = imports.gi.GLib;
+const Lang            = imports.lang;
+const Main            = imports.ui.main;
+const Mainloop        = imports.mainloop;
+const MsgTray         = imports.ui.messageTray;
+const PanelMenu       = imports.ui.panelMenu;
+const PopupMenu       = imports.ui.popupMenu;
+const Projects        = Extension.imports.projects;
+const Settings        = Extension.imports.settings;
+const Signals         = imports.signals;
+const Soup            = imports.gi.Soup;
+const St              = imports.gi.St;
 
-const Utils          = Extension.imports.utils;
-const Icons          = new Utils.Icons();
-const ProjectsDialog = new Projects.Dialog();
+const Utils           = Extension.imports.utils;
+const Icons           = new Utils.Icons();
+const ProjectsDialog  = new Projects.Dialog();
 
 // Prevent Session from being garbage collected http://goo.gl/KKCYe
-const Session        = new Soup.SessionAsync();
+const Session         = new Soup.SessionAsync();
 
 // Allow Session to work under a proxy http://goo.gl/KKCYe
 Soup.Session.prototype.add_feature.call(Session,
