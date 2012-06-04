@@ -33,6 +33,7 @@ Dialog.prototype = {
         var self = this;
 
         this._buildControls();
+        this._projectsToAdd = {};
 
         return {
           disable: function() {
@@ -134,7 +135,9 @@ Dialog.prototype = {
     // Retrieve projects list from ci given its url
     _retrieveProjectsList: function() {
         this._clearProjectsList();
-        let message = Soup.Message.new('GET', this._url.get_text());
+
+        let serverUrl = this._url.get_text();
+        let message = Soup.Message.new('GET', serverUrl);
 
         let self = this;
 
@@ -143,19 +146,24 @@ Dialog.prototype = {
             if (data != null) {
                 let parsedData = new XML(data);
                 let projectsCount = parsedData.Project.length();
-                let count = 0;
+                let index = 1;
 
                 for each(let project in parsedData.Project) {
-                    count++;
-                    let projectName = project.@name.toString();
-                    let projectCheckBox = new CheckBox.CheckBox(projectName);
+                    let name = project.@name.toString();
+                    let url = project.@webUrl.toString();
+                    let checkBox = new CheckBox.CheckBox(name);
 
-                    if (count <= (projectsCount/2)) {
-                        self._leftProjectsList.add(projectCheckBox.actor);
-                    }
-                    else {
-                        self._rightProjectsList.add(projectCheckBox.actor);
-                    };
+                    if (index <= (projectsCount/2))
+                        self._leftProjectsList.add(checkBox.actor);
+                    else
+                        self._rightProjectsList.add(checkBox.actor);
+
+                    if (self._projectsToAdd[serverUrl] === undefined)
+                        self._projectsToAdd[serverUrl] = {};
+
+                    self._projectsToAdd[serverUrl][name] = { url: url,
+                                                             actor: checkBox };
+                    index++;
                 };
             };
         });
@@ -169,9 +177,7 @@ Dialog.prototype = {
 
     // Handle URL field key press event
     _onUrlKeyPress: function(actor, event) {
-        if (event.get_key_symbol() == Clutter.Return) {
+        if (event.get_key_symbol() == Clutter.Return)
             this._retrieveProjectsList();
-        };
     }
-
 }
